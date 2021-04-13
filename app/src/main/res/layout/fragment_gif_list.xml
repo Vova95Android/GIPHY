@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="viewModel"
+            type="com.example.forgiphyapp.viewModels.GifListViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".fragments.GifListFragment">
+
+        <androidx.recyclerview.widget.RecyclerView
+
+            android:id="@+id/imageList"
+            listData="@{viewModel.dataParams}"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:clipToPadding="false"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageButton2"
+            app:spanCount="3" />
+
+        <ImageButton
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:onClick="@{()->viewModel.nextPage()}"
+            android:src="@drawable/ic_next"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1"
+            app:layout_constraintStart_toEndOf="@+id/button2" />
+
+        <ImageButton
+            android:id="@+id/button2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:enabled="@{viewModel.previousActiveButton}"
+            android:onClick="@{()->viewModel.previousPage()}"
+            android:src="@drawable/ic__before"
+            app:layout_constraintBottom_toBottomOf="@+id/button"
+            app:layout_constraintEnd_toStartOf="@+id/button"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <EditText
+            android:id="@+id/editText_newData"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ems="10"
+            android:hint="@string/search_hint"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.8"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Spinner
+            android:id="@+id/spinner_limit"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginStart="64dp"
+            android:layout_marginEnd="8dp"
+            android:entries="@array/limits"
+            app:layout_constraintBottom_toBottomOf="@+id/imageButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/imageButton"
+            app:layout_constraintTop_toTopOf="@+id/imageButton" />
+
+        <ImageButton
+            android:id="@+id/imageButton2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:onClick="@{()->viewModel.onLinearOrGrid(false)}"
+            app:layout_constraintEnd_toStartOf="@+id/imageButton"
+            app:layout_constraintHorizontal_bias="0.50"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/editText_newData"
+            app:srcCompat="@drawable/ic_linear_on" />
+
+        <ImageButton
+            android:id="@+id/imageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{()->viewModel.onLinearOrGrid(true)}"
+            app:layout_constraintBottom_toBottomOf="@+id/imageButton2"
+            app:layout_constraintEnd_toStartOf="@+id/spinner_limit"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/imageButton2"
+            app:layout_constraintTop_toTopOf="@+id/imageButton2"
+            app:srcCompat="@drawable/ic_grid_on" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
