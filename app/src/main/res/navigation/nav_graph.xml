@@ -17,7 +17,9 @@
         android:label="GifDetailFragment" >
         <action
             android:id="@+id/action_gifDetailFragment_to_gifListFragment"
-            app:destination="@id/gifListFragment" />
+            app:destination="@id/gifListFragment"
+            app:launchSingleTop="false"
+            app:popUpToInclusive="true" />
         <argument
             android:name="Id"
             app:argType="string" />

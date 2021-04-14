@@ -44,7 +44,7 @@ class GifDetailFragment : Fragment() {
             GifDetailFragmentArgs.fromBundle(requireArguments()).previewUrl)
         viewModel.removeGifLiveData.observe(viewLifecycleOwner, Observer {
             if(it) {
-                findNavController().navigate(GifDetailFragmentDirections.actionGifDetailFragmentToGifListFragment())
+                findNavController().popBackStack()
                 viewModel.navigateOk()
             }
         })

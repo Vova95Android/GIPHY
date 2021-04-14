@@ -1,16 +1,14 @@
 package com.example.forgiphyapp.viewModels
 
-import android.app.Application
 import android.util.Log
 import androidx.lifecycle.*
 import com.example.forgiphyapp.api.*
 import com.example.forgiphyapp.database.DataTransform
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabaseDao
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+
 
 abstract class GifListViewModelImpl : ViewModel() {
 
@@ -22,8 +20,7 @@ abstract class GifListViewModelImpl : ViewModel() {
 }
 
 class GifListViewModel(
-    val database: GifDatabaseDao,
-    application: Application
+    val database: GifDatabaseDao
 ) : GifListViewModelImpl() {
 
     override val previousActiveButton = MutableLiveData<Boolean>()
@@ -38,12 +35,8 @@ class GifListViewModel(
 
     val saveGifs = database.getAllGifData()
 
+    val api_key="N8ddDH1PCkpXqWiwiprA3ghbUz7bRC3J"
 
-    val databaseNotEmpty = Transformations.map(saveGifs) {
-        it?.isNotEmpty()
-    }
-
-    lateinit var api_key: String
     private var viewModelJob = Job()
     private val corutineScope = viewModelScope
     var limit: Int = 30
@@ -106,11 +99,13 @@ class GifListViewModel(
                 val listResult = getPropetiesDeferred.await()
                 var listDataRemov= listOf<Data>()
                 for (i in 0..listResult.data.size-1) {
-                    if ((!actualData.isNullOrEmpty()) &&
-                        (actualData.contains(DataTransform().getGifData(listResult.data[i], false)))
-                    ) {
-                        Log.i("GifListViewModel","data minus"+i)
-                        listDataRemov=listDataRemov.plus(listResult.data[i])
+                    for (z in 0..actualData.size-1) {
+                        if ((!actualData.isNullOrEmpty()) &&
+                            (actualData[z].id==listResult.data[i].id)
+                        ) {
+                            Log.i("GifListViewModel", "data minus" + i)
+                            listDataRemov = listDataRemov.plus(listResult.data[i])
+                        }
                     }
                 }
                 if(listDataRemov.size>0) listResult.data=listResult.data.minus(listDataRemov)

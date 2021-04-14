@@ -3,21 +3,18 @@ package com.example.forgiphyapp.fragments
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import android.widget.Spinner
-import android.widget.SpinnerAdapter
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.forgiphyapp.MainActivity
 import com.example.forgiphyapp.R
 import com.example.forgiphyapp.adapters.GifListAdapter
 import com.example.forgiphyapp.database.GifDatabase
@@ -50,11 +47,10 @@ class GifListFragment : Fragment() {
 
         val dataSource = GifDatabase.getInstance(application).gifDatabaseDao
 
-        val viewModelFactory = GifListViewModelFactory(dataSource, application)
+        val viewModelFactory = GifListViewModelFactory(dataSource)
 
         viewModel = ViewModelProvider(this,viewModelFactory).get(GifListViewModel::class.java)
 
-        viewModel.api_key = getString(R.string.api_key)
         viewModel.saveGifs.observe(viewLifecycleOwner, Observer {
             viewModel.actualData=it
         })
@@ -64,17 +60,13 @@ class GifListFragment : Fragment() {
                 .navigate(GifListFragmentDirections
                     .actionGifListFragmentToGifDetailFragment(it.id,it.images.original.url,it.images.preview_gif.url))
         })
-        binding!!.editTextNewData.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {}
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if ((s != null) && (s.isNotEmpty()) && (count != before)) {
-                    viewModel.searchNewData(s.toString())
-                    viewModel.getGiphyRealEstateProperties("g")
-                }
-            }
-        })
 
+        binding!!.lifecycleOwner = this
+        return binding!!.root
+    }
+
+    override fun onStart() {
+        super.onStart()
         viewModel.linearOrGrid.observe(viewLifecycleOwner, Observer {
             if (it) {
                 binding!!.imageList.layoutManager = GridLayoutManager(activity, 3)
@@ -89,12 +81,21 @@ class GifListFragment : Fragment() {
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {}
-
         }
 
-        binding!!.lifecycleOwner = this
-        return binding!!.root
+        binding!!.editTextNewData.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if ((s != null) && (s.isNotEmpty()) && (count != before)) {
+                    viewModel.searchNewData(s.toString())
+                    viewModel.getGiphyRealEstateProperties("g")
+                }
+            }
+        })
+        viewModel.getGiphyRealEstateProperties("g")
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
