@@ -19,7 +19,13 @@
             android:id="@+id/action_gifDetailFragment_to_gifListFragment"
             app:destination="@id/gifListFragment" />
         <argument
+            android:name="Id"
+            app:argType="string" />
+        <argument
             android:name="Detail_url"
+            app:argType="string" />
+        <argument
+            android:name="Preview_url"
             app:argType="string" />
     </fragment>
 </navigation>

@@ -9,20 +9,20 @@ import com.example.forgiphyapp.api.Data
 import com.example.forgiphyapp.api.GifParams
 import com.example.forgiphyapp.databinding.GifItemBinding
 
-class GifListAdapter(val listener: onClickListener): ListAdapter<Data, GifListAdapter.GifPropertyViewHolder>(DiffCallback) {
-    companion object DiffCallback: DiffUtil.ItemCallback<Data>() {
+class GifListAdapter(val listener: onClickListener) : ListAdapter<Data, GifListAdapter.GifPropertyViewHolder>(DiffCallback) {
+    companion object DiffCallback : DiffUtil.ItemCallback<Data>() {
         override fun areItemsTheSame(oldItem: Data, newItem: Data): Boolean {
-            return oldItem===newItem
+            return oldItem === newItem
         }
 
         override fun areContentsTheSame(oldItem: Data, newItem: Data): Boolean {
-            return oldItem.id==newItem.id
+            return oldItem.id == newItem.id
         }
     }
 
-    class GifPropertyViewHolder(private var binding: GifItemBinding) : RecyclerView.ViewHolder(binding.root){
-        fun bind(data: Data){
-            binding.data=data
+    class GifPropertyViewHolder(private var binding: GifItemBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(data: Data) {
+            binding.data = data
             binding.executePendingBindings()
         }
     }
@@ -32,14 +32,14 @@ class GifListAdapter(val listener: onClickListener): ListAdapter<Data, GifListAd
     }
 
     override fun onBindViewHolder(holder: GifPropertyViewHolder, position: Int) {
-        val gifProperty=getItem(position)
-        holder.itemView.setOnClickListener{
+        val gifProperty = getItem(position)
+        holder.itemView.setOnClickListener {
             listener.onClick(gifProperty)
         }
         holder.bind(gifProperty)
     }
 
-    class onClickListener(val clickListener: (marsProperty: Data)->Unit){
-        fun onClick(marsProperty: Data)=clickListener(marsProperty)
+    class onClickListener(val clickListener: (marsProperty: Data) -> Unit) {
+        fun onClick(marsProperty: Data) = clickListener(marsProperty)
     }
 }

@@ -20,7 +20,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.forgiphyapp.MainActivity
 import com.example.forgiphyapp.R
 import com.example.forgiphyapp.adapters.GifListAdapter
+import com.example.forgiphyapp.database.GifDatabase
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
+import com.example.forgiphyapp.vievModelsFactory.GifListViewModelFactory
 import com.example.forgiphyapp.viewModels.GifListViewModel
 
 
@@ -32,51 +34,71 @@ import com.example.forgiphyapp.viewModels.GifListViewModel
 class GifListFragment : Fragment() {
 
     private lateinit var viewModel: GifListViewModel
-
+    var binding: FragmentGifListBinding? = null
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val binding:FragmentGifListBinding = DataBindingUtil.inflate(
-            inflater,
-            R.layout.fragment_gif_list,
-            container,
-            false
+        binding = DataBindingUtil.inflate(
+                inflater,
+                R.layout.fragment_gif_list,
+                container,
+                false
         )
-        viewModel = ViewModelProvider(this).get(GifListViewModel::class.java)
-        viewModel.api_key=getString(R.string.api_key)
-        binding.viewModel=viewModel
-        binding.imageList.adapter=GifListAdapter(GifListAdapter.onClickListener{
-            this.findNavController().navigate(GifListFragmentDirections.actionGifListFragmentToGifDetailFragment(it.images.original.url))
-        })
+        val application = requireNotNull(this.activity).application
 
-        binding.editTextNewData.addTextChangedListener (object : TextWatcher {
+        val dataSource = GifDatabase.getInstance(application).gifDatabaseDao
+
+        val viewModelFactory = GifListViewModelFactory(dataSource, application)
+
+        viewModel = ViewModelProvider(this,viewModelFactory).get(GifListViewModel::class.java)
+
+        viewModel.api_key = getString(R.string.api_key)
+        viewModel.saveGifs.observe(viewLifecycleOwner, Observer {
+            viewModel.actualData=it
+        })
+        binding!!.viewModel = viewModel
+        binding!!.imageList.adapter = GifListAdapter(GifListAdapter.onClickListener {
+            this.findNavController()
+                .navigate(GifListFragmentDirections
+                    .actionGifListFragmentToGifDetailFragment(it.id,it.images.original.url,it.images.preview_gif.url))
+        })
+        binding!!.editTextNewData.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                    if ((s != null)&&(s.isNotEmpty())&&(count!=before)) {
-                        viewModel.searchNewData(s.toString())
-                        viewModel.getGiphyRealEstateProperties("g")
-                    }
+                if ((s != null) && (s.isNotEmpty()) && (count != before)) {
+                    viewModel.searchNewData(s.toString())
+                    viewModel.getGiphyRealEstateProperties("g")
+                }
             }
         })
 
         viewModel.linearOrGrid.observe(viewLifecycleOwner, Observer {
-            if (it){ binding.imageList.layoutManager=GridLayoutManager(activity,3) }
-            else {binding.imageList.layoutManager=LinearLayoutManager(activity)}
+            if (it) {
+                binding!!.imageList.layoutManager = GridLayoutManager(activity, 3)
+            } else {
+                binding!!.imageList.layoutManager = LinearLayoutManager(activity)
+            }
         })
 
-        binding.spinnerLimit.onItemSelectedListener=object : AdapterView.OnItemSelectedListener{
+        binding!!.spinnerLimit.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                viewModel.setLimits(binding.spinnerLimit.selectedItem.toString().toInt())
+                viewModel.setLimits(binding!!.spinnerLimit.selectedItem.toString().toInt())
             }
+
             override fun onNothingSelected(p0: AdapterView<*>?) {}
 
         }
 
-        binding.lifecycleOwner = this
-        return binding.root
+        binding!!.lifecycleOwner = this
+        return binding!!.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding = null
     }
 
 
