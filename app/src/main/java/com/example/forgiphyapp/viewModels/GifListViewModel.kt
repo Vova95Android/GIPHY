@@ -1,10 +1,8 @@
 package com.example.forgiphyapp.viewModels
 
 import android.app.Application
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.ViewModel
+import android.util.Log
+import androidx.lifecycle.*
 import com.example.forgiphyapp.api.*
 import com.example.forgiphyapp.database.DataTransform
 import com.example.forgiphyapp.database.GifData
@@ -20,7 +18,7 @@ abstract class GifListViewModelImpl : ViewModel() {
 
     abstract val linearOrGrid: LiveData<Boolean>
 
-    abstract val DataParams: LiveData<GifParams>
+    abstract val dataParams: LiveData<GifParams>
 }
 
 class GifListViewModel(
@@ -32,11 +30,11 @@ class GifListViewModel(
 
     override val linearOrGrid = MutableLiveData<Boolean>()
 
-    override val DataParams = MutableLiveData<GifParams>()
+    override val dataParams = MutableLiveData<GifParams>()
 
     lateinit var actualData: List<GifData>
 
-    private var _SearchData: String
+    private var _searchData: String
 
     val saveGifs = database.getAllGifData()
 
@@ -47,13 +45,13 @@ class GifListViewModel(
 
     lateinit var api_key: String
     private var viewModelJob = Job()
-    private val corutineScope = CoroutineScope(viewModelJob + Dispatchers.Main)
+    private val corutineScope = viewModelScope
     var limit: Int = 30
 
     private var _offsetData = 0
 
     init {
-        _SearchData = "a"
+        _searchData = "a"
         previousActiveButton.value = false
     }
 
@@ -63,7 +61,7 @@ class GifListViewModel(
     }
 
     fun searchNewData(data: String) {
-        _SearchData = data
+        _searchData = data
         _offsetData = 0
         previousActiveButton.value = false
     }
@@ -98,7 +96,7 @@ class GifListViewModel(
         corutineScope.launch {
             val getPropetiesDeferred = GiphyAPI.retrofitService.getGifList(
                 api_key,
-                _SearchData,
+                _searchData,
                 limit,
                 _offsetData,
                 "g",
@@ -106,16 +104,19 @@ class GifListViewModel(
             )
             try {
                 val listResult = getPropetiesDeferred.await()
-                for (i in 0..listResult.data.size) {
+                var listDataRemov= listOf<Data>()
+                for (i in 0..listResult.data.size-1) {
                     if ((!actualData.isNullOrEmpty()) &&
                         (actualData.contains(DataTransform().getGifData(listResult.data[i], false)))
                     ) {
-                        println("data minus")
-                        listResult.data.minus(listResult.data[i])
+                        Log.i("GifListViewModel","data minus"+i)
+                        listDataRemov=listDataRemov.plus(listResult.data[i])
                     }
                 }
-                DataParams.value = listResult
+                if(listDataRemov.size>0) listResult.data=listResult.data.minus(listDataRemov)
+                dataParams.value = listResult
             } catch (t: Throwable) {
+                if (t.message!=null) Log.e("GifListViewModel", t.message!!)
             }
         }
     }
