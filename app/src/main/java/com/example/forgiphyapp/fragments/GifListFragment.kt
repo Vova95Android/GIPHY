@@ -89,11 +89,11 @@ class GifListFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if ((s != null) && (s.isNotEmpty()) && (count != before)) {
                     viewModel.searchNewData(s.toString())
-                    viewModel.getGiphyRealEstateProperties("g")
+                    viewModel.getGiphyRealEstateProperties("g", null)
                 }
             }
         })
-        viewModel.getGiphyRealEstateProperties("g")
+        viewModel.getGiphyRealEstateProperties("g", null)
     }
 
 
