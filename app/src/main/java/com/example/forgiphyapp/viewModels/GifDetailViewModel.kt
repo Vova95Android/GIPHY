@@ -39,7 +39,7 @@ class GifDetailViewModel(
     fun onRemoveGif(){
         corutineScope.launch {
         data.active=false
-        database.update(data)
+                database.update(data)
             removeGifLiveData.value=true
         }
     }

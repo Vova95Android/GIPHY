@@ -12,15 +12,19 @@ import android.widget.AdapterView
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.forgiphyapp.R
 import com.example.forgiphyapp.adapters.GifListAdapter
+import com.example.forgiphyapp.adapters.GifListPagingAdapter
 import com.example.forgiphyapp.database.GifDatabase
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
 import com.example.forgiphyapp.vievModelsFactory.GifListViewModelFactory
 import com.example.forgiphyapp.viewModels.GifListViewModel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 
 /**
@@ -31,6 +35,7 @@ import com.example.forgiphyapp.viewModels.GifListViewModel
 class GifListFragment : Fragment() {
 
     private lateinit var viewModel: GifListViewModel
+    private lateinit var adapter: GifListPagingAdapter
     var binding: FragmentGifListBinding? = null
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
@@ -55,11 +60,6 @@ class GifListFragment : Fragment() {
             viewModel.actualData=it
         })
         binding!!.viewModel = viewModel
-        binding!!.imageList.adapter = GifListAdapter(GifListAdapter.onClickListener {
-            this.findNavController()
-                .navigate(GifListFragmentDirections
-                    .actionGifListFragmentToGifDetailFragment(it.id,it.images.original.url,it.images.preview_gif.url))
-        })
 
         binding!!.lifecycleOwner = this
         return binding!!.root
@@ -75,31 +75,36 @@ class GifListFragment : Fragment() {
             }
         })
 
-        binding!!.spinnerLimit.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                viewModel.setLimits(binding!!.spinnerLimit.selectedItem.toString().toInt())
-            }
-
-            override fun onNothingSelected(p0: AdapterView<*>?) {}
-        }
-
         binding!!.editTextNewData.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if ((s != null) && (s.isNotEmpty()) && (count != before)) {
                     viewModel.searchNewData(s.toString())
-                    viewModel.toStartPage()
-                    viewModel.getGiphyRealEstateProperties("g", null)
+                    fetchPosts()
                 }
             }
         })
+        adapter=GifListPagingAdapter(GifListPagingAdapter.onClickListener {
+            this.findNavController()
+                .navigate(GifListFragmentDirections
+                    .actionGifListFragmentToGifDetailFragment(it.id,it.images.original.url,it.images.preview_gif.url))
+        })
+        binding!!.imageList.adapter=adapter
     }
 
 
     override fun onDestroyView() {
         super.onDestroyView()
         binding = null
+    }
+
+    private fun fetchPosts() {
+        lifecycleScope.launch {
+            viewModel.fetchGif().collectLatest { pagingData ->
+                adapter.submitData(pagingData)
+            }
+        }
     }
 
 
