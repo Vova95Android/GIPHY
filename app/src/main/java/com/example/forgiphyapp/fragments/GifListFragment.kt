@@ -59,8 +59,20 @@ class GifListFragment : Fragment() {
         viewModel.saveGifs.observe(viewLifecycleOwner, Observer {
             viewModel.actualData=it
         })
+
+
         binding!!.viewModel = viewModel
 
+
+        adapter=GifListPagingAdapter(GifListPagingAdapter.onClickListener {
+            if(!it.images.original.url.isNullOrEmpty())
+                this.findNavController()
+                    .navigate(GifListFragmentDirections
+                        .actionGifListFragmentToGifDetailFragment(it.id,it.images.original.url,it.images.preview_gif.url))
+        })
+        binding!!.imageList.adapter=adapter
+
+        fetchPosts()
         binding!!.lifecycleOwner = this
         return binding!!.root
     }
@@ -85,13 +97,6 @@ class GifListFragment : Fragment() {
                 }
             }
         })
-        adapter=GifListPagingAdapter(GifListPagingAdapter.onClickListener {
-            if(!it.images.original.url.isNullOrEmpty())
-            this.findNavController()
-                .navigate(GifListFragmentDirections
-                    .actionGifListFragmentToGifDetailFragment(it.id,it.images.original.url,it.images.preview_gif.url))
-        })
-        binding!!.imageList.adapter=adapter
     }
 
 

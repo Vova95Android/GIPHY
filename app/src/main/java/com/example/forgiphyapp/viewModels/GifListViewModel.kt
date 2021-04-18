@@ -1,19 +1,16 @@
 package com.example.forgiphyapp .viewModels
 
-import android.util.Log
 import androidx.lifecycle.*
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.example.forgiphyapp.api.*
-import com.example.forgiphyapp.database.DataTransform
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabaseDao
 import com.example.forgiphyapp.pagingApi.PagingSourceGif
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 
 
 abstract class GifListViewModelImpl : ViewModel() {
@@ -39,7 +36,7 @@ class GifListViewModel(
 
 
 
-    lateinit var actualData: List<GifData>
+    var actualData: List<GifData>?=null
 
     private var _searchData: String?
 
@@ -55,7 +52,7 @@ class GifListViewModel(
 
     init {
         start=false
-        _searchData = null
+        _searchData = "A"
         previousActiveButton.value = false
     }
 
