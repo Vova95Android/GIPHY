@@ -17,6 +17,7 @@
 
 package com.example.forgiphyapp
 
+import android.net.Uri
 import android.view.View
 import android.widget.ImageView
 import androidx.core.net.toUri
@@ -46,6 +47,23 @@ fun bindImage(imgView: ImageView, imgUrl: String?) {
                         .placeholder(R.drawable.loading_animation)
                         .error(R.drawable.ic_broken_image))
                 .into(imgView)
+    }
+}
+
+@BindingAdapter("imageUrl")
+fun bindImage(imgView: ImageView, data: Data) {
+    data.let {
+        val imgUri: Uri
+        if (data.images.preview_gif.url.isNullOrEmpty()){
+        imgUri = it.images.original.url!!.toUri().buildUpon().scheme("https").build()}
+        else{
+        imgUri = it.images.preview_gif.url!!.toUri().buildUpon().scheme("https").build()}
+        Glide.with(imgView.context)
+            .load(imgUri)
+            .apply(RequestOptions()
+                .placeholder(R.drawable.loading_animation)
+                .error(R.drawable.ic_broken_image))
+            .into(imgView)
     }
 }
 

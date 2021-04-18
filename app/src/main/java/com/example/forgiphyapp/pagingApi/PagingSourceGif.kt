@@ -71,9 +71,9 @@ class PagingSourceGif(val searchData: String, val actualData: List<GifData>, val
 
     suspend private fun setGifTodatabase(data: GifParams) {
         var findToDatabase = false
-        for (gif_pos in 0..data.data.size - 1) {
-            for (data_pos in 0..actualData.size - 1) {
-                if (actualData[data_pos].id == data.data[gif_pos].id) findToDatabase = true
+        for (gif_pos in data.data.indices) {
+            for (element in actualData) {
+                if (element.id == data.data[gif_pos].id) findToDatabase = true
             }
             if (!findToDatabase) database.insert(
                 DataTransform().getGifData(

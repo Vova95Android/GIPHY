@@ -28,6 +28,7 @@
             app:argType="string" />
         <argument
             android:name="Preview_url"
-            app:argType="string" />
+            app:argType="string"
+            app:nullable="true" />
     </fragment>
 </navigation>

@@ -7,4 +7,4 @@ class Data(
 )
 
 class Images(val original: Original, val preview_gif: Original)
-class Original(val url: String)
+class Original(val url: String?)

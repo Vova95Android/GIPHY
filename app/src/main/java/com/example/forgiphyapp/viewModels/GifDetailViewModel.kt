@@ -7,8 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabaseDao
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
@@ -29,7 +27,7 @@ class GifDetailViewModel(
     private val corutineScope = viewModelScope
 
 
-    fun setData(id:String,detailUrl: String,prewUrl: String) {
+    fun setData(id:String,detailUrl: String,prewUrl: String?) {
         urlLiveData.value = detailUrl
         data= GifData(id,detailUrl,prewUrl,true)
     }

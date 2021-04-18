@@ -86,6 +86,7 @@ class GifListFragment : Fragment() {
             }
         })
         adapter=GifListPagingAdapter(GifListPagingAdapter.onClickListener {
+            if(!it.images.original.url.isNullOrEmpty())
             this.findNavController()
                 .navigate(GifListFragmentDirections
                     .actionGifListFragmentToGifDetailFragment(it.id,it.images.original.url,it.images.preview_gif.url))
