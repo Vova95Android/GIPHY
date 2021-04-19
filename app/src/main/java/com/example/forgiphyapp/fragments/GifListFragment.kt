@@ -19,13 +19,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.forgiphyapp.R
 import com.example.forgiphyapp.adapters.GifListAdapter
 import com.example.forgiphyapp.adapters.GifListPagingAdapter
+import com.example.forgiphyapp.dagger.App
 import com.example.forgiphyapp.database.GifDatabase
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
 import com.example.forgiphyapp.vievModelsFactory.GifListViewModelFactory
 import com.example.forgiphyapp.viewModels.GifListViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-
+import javax.inject.Inject
 
 /**
  * A simple [Fragment] subclass.
@@ -36,6 +37,10 @@ class GifListFragment : Fragment() {
 
     private lateinit var viewModel: GifListViewModel
     private lateinit var adapter: GifListPagingAdapter
+
+    @Inject
+    lateinit var viewModelFactory: GifListViewModelFactory
+
     var binding: FragmentGifListBinding? = null
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
@@ -50,14 +55,17 @@ class GifListFragment : Fragment() {
         )
         val application = requireNotNull(this.activity).application
 
-        val dataSource = GifDatabase.getInstance(application).gifDatabaseDao
+        (this.requireActivity().application as App).component.inject(this)
 
-        val viewModelFactory = GifListViewModelFactory(dataSource)
 
         viewModel = ViewModelProvider(this,viewModelFactory).get(GifListViewModel::class.java)
 
-        viewModel.saveGifs.observe(viewLifecycleOwner, Observer {
-            viewModel.actualData=it
+        viewModel.saveGifs.observe(viewLifecycleOwner, {
+            var update=false
+            if ((viewModel.actualData.isNullOrEmpty())||(it.size == viewModel.actualData!!.size)) update=true
+            viewModel.actualData = it
+
+            if (update) viewModel.refresh()
         })
 
 
@@ -79,7 +87,7 @@ class GifListFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        viewModel.linearOrGrid.observe(viewLifecycleOwner, Observer {
+        viewModel.linearOrGrid.observe(viewLifecycleOwner, {
             if (it) {
                 binding!!.imageList.layoutManager = GridLayoutManager(activity, 3)
             } else {
@@ -93,7 +101,7 @@ class GifListFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if ((s != null) && (s.isNotEmpty()) && (count != before)) {
                     viewModel.searchNewData(s.toString())
-                    fetchPosts()
+                    viewModel.refresh()
                 }
             }
         })

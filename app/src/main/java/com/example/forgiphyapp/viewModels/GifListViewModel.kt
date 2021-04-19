@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 
 
 abstract class GifListViewModelImpl : ViewModel() {
+    abstract fun refresh()
 
     abstract val previousActiveButton: LiveData<Boolean>
 
@@ -25,6 +26,9 @@ abstract class GifListViewModelImpl : ViewModel() {
 class GifListViewModel(
     val database: GifDatabaseDao
 ) : GifListViewModelImpl() {
+    override fun refresh() {
+        TODO("Not yet implemented")
+    }
 
     override val previousActiveButton = MutableLiveData<Boolean>()
 

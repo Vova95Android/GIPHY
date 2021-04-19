@@ -11,14 +11,11 @@ import javax.inject.Singleton
 @Component(modules = [Module::class])
 interface ApplicationGraph {
 
-
     fun inject(gifListFragment: GifListFragment)
     fun inject(gifDetailFragment: GifDetailFragment)
-
 
     @Component.Factory
     interface Factory{
         fun create(@BindsInstance context: Context): ApplicationGraph
     }
-
 }
