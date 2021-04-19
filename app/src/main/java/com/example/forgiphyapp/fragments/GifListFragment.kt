@@ -9,27 +9,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.forgiphyapp.R
 import com.example.forgiphyapp.adapters.GifListAdapter
 import com.example.forgiphyapp.adapters.GifListPagingAdapter
-import com.example.forgiphyapp.dagger.App
 import com.example.forgiphyapp.database.GifDatabase
-import com.example.forgiphyapp.database.GifDatabaseDao
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
 import com.example.forgiphyapp.vievModelsFactory.GifListViewModelFactory
 import com.example.forgiphyapp.viewModels.GifListViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 
 /**
@@ -41,19 +36,11 @@ class GifListFragment : Fragment() {
 
     private lateinit var viewModel: GifListViewModel
     private lateinit var adapter: GifListPagingAdapter
-
-    @Inject
-    lateinit var viewModelFactory: GifListViewModelFactory
-
-    @Inject
-    lateinit var dataSource: GifDatabaseDao
-
     var binding: FragmentGifListBinding? = null
-
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
-    ): View {
+    ): View? {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(
                 inflater,
@@ -61,19 +48,16 @@ class GifListFragment : Fragment() {
                 container,
                 false
         )
+        val application = requireNotNull(this.activity).application
 
-        (this.requireActivity().application as App).component.inject(this)
+        val dataSource = GifDatabase.getInstance(application).gifDatabaseDao
 
-
+        val viewModelFactory = GifListViewModelFactory(dataSource)
 
         viewModel = ViewModelProvider(this,viewModelFactory).get(GifListViewModel::class.java)
 
-        viewModel.saveGifs.observe(viewLifecycleOwner, {
-            var update=false
-            if ((viewModel.actualData.isNullOrEmpty())||(it.size == viewModel.actualData!!.size)) update=true
-            viewModel.actualData = it
-
-            if (update) fetchPosts()
+        viewModel.saveGifs.observe(viewLifecycleOwner, Observer {
+            viewModel.actualData=it
         })
 
 
@@ -86,22 +70,16 @@ class GifListFragment : Fragment() {
                     .navigate(GifListFragmentDirections
                         .actionGifListFragmentToGifDetailFragment(it.id,it.images.original.url,it.images.preview_gif.url))
         })
-        adapter.addLoadStateListener {loadState->
-            binding!!.progressBar.isVisible=loadState.refresh is LoadState.Loading
-            binding!!.imageList.isVisible=loadState.refresh is LoadState.NotLoading
-            binding!!.textError.isVisible=loadState.refresh is LoadState.Error
-            binding!!.buttonError.isVisible=loadState.refresh is LoadState.Error
-
-        }
         binding!!.imageList.adapter=adapter
 
+        fetchPosts()
         binding!!.lifecycleOwner = this
         return binding!!.root
     }
 
     override fun onStart() {
         super.onStart()
-        viewModel.linearOrGrid.observe(viewLifecycleOwner, {
+        viewModel.linearOrGrid.observe(viewLifecycleOwner, Observer {
             if (it) {
                 binding!!.imageList.layoutManager = GridLayoutManager(activity, 3)
             } else {
@@ -119,10 +97,6 @@ class GifListFragment : Fragment() {
                 }
             }
         })
-
-        viewModel.dataPaging.observe(viewLifecycleOwner,{
-            lifecycleScope.launch {   adapter.submitData(it)}
-        })
     }
 
 
@@ -132,16 +106,11 @@ class GifListFragment : Fragment() {
     }
 
     private fun fetchPosts() {
-        binding!!.progressBar.visibility=View.VISIBLE
-        binding!!.imageList.visibility=View.INVISIBLE
-        binding!!.textError.visibility=View.GONE
-        binding!!.buttonError.visibility=View.GONE
-        viewModel.refresh()
-//        lifecycleScope.launch {
-//            viewModel.fetchGif().collectLatest { pagingData ->
-//                adapter.submitData(pagingData)
-//            }
-//        }
+        lifecycleScope.launch {
+            viewModel.fetchGif().collectLatest { pagingData ->
+                adapter.submitData(pagingData)
+            }
+        }
     }
 
 

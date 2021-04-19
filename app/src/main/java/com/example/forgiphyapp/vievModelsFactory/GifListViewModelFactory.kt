@@ -4,11 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.forgiphyapp.database.GifDatabaseDao
 import com.example.forgiphyapp.viewModels.GifListViewModel
-import javax.inject.Inject
 
-class GifListViewModelFactory @Inject constructor(
+class GifListViewModelFactory(
     private val dataSource: GifDatabaseDao
-) : ViewModelProvider.Factory {
+): ViewModelProvider.Factory {
 
     @Suppress("unchecked_cast")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {

@@ -10,24 +10,16 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.example.forgiphyapp.R
-import com.example.forgiphyapp.dagger.App
 import com.example.forgiphyapp.database.GifDatabase
-import com.example.forgiphyapp.database.GifDatabaseDao
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
 import com.example.forgiphyapp.databinding.GifDetailFragmentBinding
 import com.example.forgiphyapp.vievModelsFactory.GifDetailViewModelFactory
 import com.example.forgiphyapp.vievModelsFactory.GifListViewModelFactory
 import com.example.forgiphyapp.viewModels.GifDetailViewModel
-import javax.inject.Inject
 
 class GifDetailFragment : Fragment() {
 
     private lateinit var viewModel: GifDetailViewModel
-
-    @Inject
-    lateinit var dataSource: GifDatabaseDao
-
-
     var binding: GifDetailFragmentBinding? = null
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
@@ -41,9 +33,7 @@ class GifDetailFragment : Fragment() {
         )
         val application = requireNotNull(this.activity).application
 
-        (this.requireActivity().application as App).component.inject(this)
-
-        // dataSource = GifDatabase.getInstance(application).gifDatabaseDao
+        val dataSource = GifDatabase.getInstance(application).gifDatabaseDao
 
         val viewModelFactory = GifDetailViewModelFactory(dataSource, application)
         viewModel = ViewModelProvider(this, viewModelFactory).get(GifDetailViewModel::class.java)

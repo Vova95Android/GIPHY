@@ -1,6 +1,6 @@
 package com.example.forgiphyapp.api
 
-class GifParams (var data: List<Data>)
+class GifParams(var data: List<Data>)
 
 class Data(
         val id: String, val images: Images

@@ -94,8 +94,4 @@ dependencies {
     implementation "androidx.paging:paging-compose:1.0.0-alpha08"
 
 
-    implementation "com.google.dagger:dagger:$version_dagger"
-    kapt "com.google.dagger:dagger-compiler:$version_dagger"
-
-
 }
