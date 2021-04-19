@@ -11,6 +11,8 @@ import com.example.forgiphyapp.database.GifDatabaseDao
 import com.example.forgiphyapp.pagingApi.PagingSourceGif
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 
 abstract class GifListViewModelImpl : ViewModel() {
@@ -21,13 +23,19 @@ abstract class GifListViewModelImpl : ViewModel() {
     abstract val linearOrGrid: LiveData<Boolean>
 
     abstract val dataParams: LiveData<GifParams>
+
+    abstract val dataPagimg: LiveData<PagingData<Data>>
 }
 
 class GifListViewModel(
     val database: GifDatabaseDao
 ) : GifListViewModelImpl() {
     override fun refresh() {
-        TODO("Not yet implemented")
+        viewModelScope.launch {
+            fetchGif().collect {
+                dataPagimg.value=it
+            }
+        }
     }
 
     override val previousActiveButton = MutableLiveData<Boolean>()
@@ -35,6 +43,8 @@ class GifListViewModel(
     override val linearOrGrid = MutableLiveData<Boolean>()
 
     override val dataParams = MutableLiveData<GifParams>()
+
+    override val dataPagimg= MutableLiveData<PagingData<Data>>()
 
 
 

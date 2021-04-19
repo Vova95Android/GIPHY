@@ -53,7 +53,6 @@ class GifListFragment : Fragment() {
                 container,
                 false
         )
-        val application = requireNotNull(this.activity).application
 
         (this.requireActivity().application as App).component.inject(this)
 
@@ -78,9 +77,15 @@ class GifListFragment : Fragment() {
                     .navigate(GifListFragmentDirections
                         .actionGifListFragmentToGifDetailFragment(it.id,it.images.original.url,it.images.preview_gif.url))
         })
+
+        viewModel.dataPagimg.observe(viewLifecycleOwner,{
+            lifecycleScope.launch{
+                adapter.submitData(it)
+            }
+        })
+
         binding!!.imageList.adapter=adapter
 
-        fetchPosts()
         binding!!.lifecycleOwner = this
         return binding!!.root
     }
@@ -113,13 +118,6 @@ class GifListFragment : Fragment() {
         binding = null
     }
 
-    private fun fetchPosts() {
-        lifecycleScope.launch {
-            viewModel.fetchGif().collectLatest { pagingData ->
-                adapter.submitData(pagingData)
-            }
-        }
-    }
 
 
 }
