@@ -43,8 +43,7 @@ class PagingSourceGif(
             } catch (t: Throwable) {
                 Log.e("PagingSource", "error")
                 if (t.message != null) Log.e("PagingSource", t.message!!)
-                //return LoadResult.Error(t)
-                listResultTemp = getUrlFromDatabase(limitTemp, offseData)
+                return LoadResult.Error(t)
             }
 
             for (i in 0..listResultTemp.data.size - 1) {

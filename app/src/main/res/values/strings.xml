@@ -5,4 +5,6 @@
     <string name="next_button">Следующая</string>
     <string name="previous_button">Предыдущая</string>
     <string name="search_hint">Найти...</string>
+    <string name="button_error">обновить</string>
+    <string name="text_error">Ошибка загрузки, пожалуйста обновите страницу</string>
 </resources>

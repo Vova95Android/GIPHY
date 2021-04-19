@@ -13,6 +13,7 @@ buildscript {
                 version_moshi = "1.9.3"
                 version_glide = "4.11.0"
                 version_room = "2.2.5"
+                version_dagger="2.34.1"
 
                 paging_version = "3.0.0-beta02"
 

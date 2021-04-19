@@ -1,4 +1,4 @@
-package com.example.forgiphyapp .viewModels
+package com.example.forgiphyapp.viewModels
 
 import androidx.lifecycle.*
 import androidx.paging.Pager
@@ -11,6 +11,8 @@ import com.example.forgiphyapp.database.GifDatabaseDao
 import com.example.forgiphyapp.pagingApi.PagingSourceGif
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 
 abstract class GifListViewModelImpl : ViewModel() {
@@ -20,6 +22,8 @@ abstract class GifListViewModelImpl : ViewModel() {
     abstract val linearOrGrid: LiveData<Boolean>
 
     abstract val dataParams: LiveData<GifParams>
+
+    abstract val dataPaging: LiveData<PagingData<Data>>
 }
 
 class GifListViewModel(
@@ -32,30 +36,29 @@ class GifListViewModel(
 
     override val dataParams = MutableLiveData<GifParams>()
 
+    override val dataPaging = MutableLiveData<PagingData<Data>>()
 
 
-
-
-    var actualData: List<GifData>?=null
+    var actualData: List<GifData>? = null
 
     private var _searchData: String?
 
-    var start: Boolean
-
     val saveGifs = database.getAllGifData()
-
-    private var viewModelJob = Job()
-    var limit: Int = 15
-
-    private var _offsetData = 0
 
 
     init {
-        start=false
         _searchData = "A"
         previousActiveButton.value = false
     }
 
+
+    fun refresh(){
+        viewModelScope.launch {
+            fetchGif().collect {
+                dataPaging.value=it
+            }
+        }
+    }
 
     fun fetchGif(): Flow<PagingData<Data>> {
         return Pager(PagingConfig(pageSize = 20, enablePlaceholders = false))
@@ -64,15 +67,9 @@ class GifListViewModel(
             .cachedIn(viewModelScope)
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        viewModelJob.cancel()
-    }
-
 
     fun searchNewData(data: String) {
         _searchData = data
-        _offsetData = 0
         previousActiveButton.value = false
     }
 
