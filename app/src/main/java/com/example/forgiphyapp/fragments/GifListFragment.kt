@@ -9,11 +9,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
+import androidx.paging.LoadStates
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.forgiphyapp.R
@@ -77,6 +80,13 @@ class GifListFragment : Fragment() {
                     .navigate(GifListFragmentDirections
                         .actionGifListFragmentToGifDetailFragment(it.id,it.images.original.url,it.images.preview_gif.url))
         })
+
+        adapter.addLoadStateListener { loadState->
+            binding!!.progressBar.isVisible=loadState.refresh is LoadState.Loading
+            binding!!.imageList.isVisible=loadState.refresh !is LoadState.Loading
+            binding!!.buttonError.isVisible=loadState.refresh is LoadState.Error
+            binding!!.textError.isVisible=loadState.refresh is LoadState.Error
+        }
 
         viewModel.dataPagimg.observe(viewLifecycleOwner,{
             lifecycleScope.launch{
