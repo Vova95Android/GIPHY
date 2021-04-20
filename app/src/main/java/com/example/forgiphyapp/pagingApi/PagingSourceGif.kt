@@ -95,7 +95,7 @@ class PagingSourceGif(
     }
 
     private fun getUrlFromDatabase(limit: Int, offset: Int): GifParams {
-        var data_temp = listOf<Data>()
+        val data_temp = listOf<Data>()
         if (actualData != null)
             for (data_count in offset..offset + limit) {
                 data_temp.plus(DataTransform().getData(actualData[data_count]))

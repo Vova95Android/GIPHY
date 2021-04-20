@@ -15,7 +15,7 @@ interface ApplicationGraph {
     fun inject(gifDetailFragment: GifDetailFragment)
 
     @Component.Factory
-    interface Factory{
+    interface Factory {
         fun create(@BindsInstance context: Context): ApplicationGraph
     }
 }

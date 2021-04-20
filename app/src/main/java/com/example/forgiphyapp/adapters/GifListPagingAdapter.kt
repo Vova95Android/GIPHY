@@ -9,12 +9,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.forgiphyapp.api.Data
 import com.example.forgiphyapp.databinding.GifItemBinding
 
-class GifListPagingAdapter(val listener: onClickListener):
+class GifListPagingAdapter(val listener: onClickListener) :
     PagingDataAdapter<Data, GifListPagingAdapter.GifListViewHolder>(DiffCallback) {
 
 
     override fun onBindViewHolder(holder: GifListViewHolder, position: Int) {
-        val item=getItem(position)
+        val item = getItem(position)
         holder.itemView.setOnClickListener {
             listener.onClick(item!!)
         }
@@ -22,10 +22,11 @@ class GifListPagingAdapter(val listener: onClickListener):
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GifListViewHolder {
-       return GifListViewHolder(GifItemBinding.inflate(LayoutInflater.from(parent.context)))
+        return GifListViewHolder(GifItemBinding.inflate(LayoutInflater.from(parent.context)))
     }
 
-    class GifListViewHolder(private var binding: GifItemBinding) : RecyclerView.ViewHolder(binding.root) {
+    class GifListViewHolder(private var binding: GifItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bind(data: Data) {
             binding.data = data
             binding.executePendingBindings()

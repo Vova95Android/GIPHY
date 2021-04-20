@@ -9,7 +9,8 @@ import com.example.forgiphyapp.api.Data
 import com.example.forgiphyapp.api.GifParams
 import com.example.forgiphyapp.databinding.GifItemBinding
 
-class GifListAdapter(val listener: onClickListener) : ListAdapter<Data, GifListAdapter.GifPropertyViewHolder>(DiffCallback) {
+class GifListAdapter(val listener: onClickListener) :
+    ListAdapter<Data, GifListAdapter.GifPropertyViewHolder>(DiffCallback) {
     companion object DiffCallback : DiffUtil.ItemCallback<Data>() {
         override fun areItemsTheSame(oldItem: Data, newItem: Data): Boolean {
             return oldItem === newItem
@@ -20,7 +21,8 @@ class GifListAdapter(val listener: onClickListener) : ListAdapter<Data, GifListA
         }
     }
 
-    class GifPropertyViewHolder(private var binding: GifItemBinding) : RecyclerView.ViewHolder(binding.root) {
+    class GifPropertyViewHolder(private var binding: GifItemBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bind(data: Data) {
             binding.data = data
             binding.executePendingBindings()

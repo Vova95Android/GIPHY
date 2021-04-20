@@ -3,6 +3,7 @@ package com.example.forgiphyapp.dagger
 import android.content.Context
 import com.example.forgiphyapp.database.GifDatabase
 import com.example.forgiphyapp.database.GifDatabaseDao
+import com.example.forgiphyapp.vievModelsFactory.GifDetailViewModelFactory
 import com.example.forgiphyapp.vievModelsFactory.GifListViewModelFactory
 import dagger.Module
 import dagger.Provides
@@ -11,13 +12,18 @@ import dagger.Provides
 class Module {
 
     @Provides
-    fun getDatabase(context: Context): GifDatabaseDao{
+    fun getDatabase(context: Context): GifDatabaseDao {
         return GifDatabase.getInstance(context).gifDatabaseDao
     }
 
     @Provides
     fun getViewModelFactory(databaseDao: GifDatabaseDao): GifListViewModelFactory {
         return GifListViewModelFactory(databaseDao)
+    }
+
+    @Provides
+    fun getViewModelDetailFactory(databaseDao: GifDatabaseDao): GifDetailViewModelFactory {
+        return GifDetailViewModelFactory(databaseDao)
     }
 
 }

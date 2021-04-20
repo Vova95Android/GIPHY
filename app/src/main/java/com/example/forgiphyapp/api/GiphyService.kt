@@ -14,24 +14,24 @@ private const val BASE_URL = "https://api.giphy.com/v1/gifs/"
 
 
 private val moshi = Moshi.Builder()
-        .add(KotlinJsonAdapterFactory())
-        .build()
+    .add(KotlinJsonAdapterFactory())
+    .build()
 
 private val retrofit = Retrofit.Builder()
-        .addConverterFactory(MoshiConverterFactory.create(moshi))
-        .addCallAdapterFactory(CoroutineCallAdapterFactory())
-        .baseUrl(BASE_URL)
-        .build()
+    .addConverterFactory(MoshiConverterFactory.create(moshi))
+    .addCallAdapterFactory(CoroutineCallAdapterFactory())
+    .baseUrl(BASE_URL)
+    .build()
 
 interface GiphyService {
     @GET("search")
     fun getGifList(
-            @Query("api_key") key: String,
-            @Query("q") search: String,
-            @Query("limit") limit: Int,
-            @Query("offset") offset: Int,
-            @Query("rating") rating: String,
-            @Query("lang") lang: String
+        @Query("api_key") key: String,
+        @Query("q") search: String,
+        @Query("limit") limit: Int,
+        @Query("offset") offset: Int,
+        @Query("rating") rating: String,
+        @Query("lang") lang: String
     ): Deferred<GifParams>
 }
 

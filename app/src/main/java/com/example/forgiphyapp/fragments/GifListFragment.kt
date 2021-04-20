@@ -3,31 +3,24 @@ package com.example.forgiphyapp.fragments
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
-import androidx.paging.LoadStates
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.forgiphyapp.R
-import com.example.forgiphyapp.adapters.GifListAdapter
 import com.example.forgiphyapp.adapters.GifListPagingAdapter
 import com.example.forgiphyapp.dagger.App
-import com.example.forgiphyapp.database.GifDatabase
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
 import com.example.forgiphyapp.vievModelsFactory.GifListViewModelFactory
 import com.example.forgiphyapp.viewModels.GifListViewModel
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -46,57 +39,61 @@ class GifListFragment : Fragment() {
 
     var binding: FragmentGifListBinding? = null
     override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(
-                inflater,
-                R.layout.fragment_gif_list,
-                container,
-                false
+            inflater,
+            R.layout.fragment_gif_list,
+            container,
+            false
         )
 
         (this.requireActivity().application as App).component.inject(this)
 
-
-        viewModel = ViewModelProvider(this,viewModelFactory).get(GifListViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(GifListViewModel::class.java)
 
         viewModel.saveGifs.observe(viewLifecycleOwner, {
-            var update=false
-            if ((viewModel.actualData.isNullOrEmpty())||(it.size == viewModel.actualData!!.size)) update=true
-            viewModel.actualData = it
 
-            if (update) viewModel.refresh()
+            if ((viewModel.actualData.isNullOrEmpty()) || (it.size == viewModel.actualData!!.size)) {
+                viewModel.actualData = it
+                viewModel.refresh()
+            } else viewModel.actualData = it
         })
-
 
         binding!!.viewModel = viewModel
 
-
-        adapter=GifListPagingAdapter(GifListPagingAdapter.onClickListener {
-            if(!it.images.original.url.isNullOrEmpty())
+        adapter = GifListPagingAdapter(GifListPagingAdapter.onClickListener {
+            if (!it.images.original.url.isNullOrEmpty())
                 this.findNavController()
-                    .navigate(GifListFragmentDirections
-                        .actionGifListFragmentToGifDetailFragment(it.id,it.images.original.url,it.images.preview_gif.url))
+                    .navigate(
+                        GifListFragmentDirections
+                            .actionGifListFragmentToGifDetailFragment(
+                                it.id,
+                                it.images.original.url,
+                                it.images.preview_gif.url
+                            )
+                    )
         })
 
-        adapter.addLoadStateListener { loadState->
-            binding!!.progressBar.isVisible=loadState.refresh is LoadState.Loading
-            binding!!.imageList.isVisible=loadState.refresh !is LoadState.Loading
-            binding!!.buttonError.isVisible=loadState.refresh is LoadState.Error
-            binding!!.textError.isVisible=loadState.refresh is LoadState.Error
+        adapter.addLoadStateListener { loadState ->
+            binding!!.progressBar.isVisible = loadState.refresh is LoadState.Loading
+            binding!!.imageList.isVisible = loadState.refresh !is LoadState.Loading
+            binding!!.buttonError.isVisible = loadState.refresh is LoadState.Error
+            binding!!.textError.isVisible = loadState.refresh is LoadState.Error
         }
 
-        viewModel.dataPagimg.observe(viewLifecycleOwner,{
-            lifecycleScope.launch{
+        viewModel.dataPagimg.observe(viewLifecycleOwner, {
+            lifecycleScope.launch {
                 adapter.submitData(it)
             }
         })
 
-        binding!!.imageList.adapter=adapter
+        binding!!.imageList.adapter = adapter
 
         binding!!.lifecycleOwner = this
+
         return binding!!.root
     }
 
@@ -127,7 +124,6 @@ class GifListFragment : Fragment() {
         super.onDestroyView()
         binding = null
     }
-
 
 
 }

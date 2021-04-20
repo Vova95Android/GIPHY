@@ -7,7 +7,7 @@ import com.example.forgiphyapp.viewModels.GifListViewModel
 
 class GifListViewModelFactory(
     private val dataSource: GifDatabaseDao
-): ViewModelProvider.Factory {
+) : ViewModelProvider.Factory {
 
     @Suppress("unchecked_cast")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
