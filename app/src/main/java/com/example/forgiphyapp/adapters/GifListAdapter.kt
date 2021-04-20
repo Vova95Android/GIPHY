@@ -24,7 +24,6 @@ class GifListAdapter(val listener: onClickListener) :
     class GifPropertyViewHolder(private var binding: GifItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(data: Data) {
-            binding.data = data
             binding.executePendingBindings()
         }
     }

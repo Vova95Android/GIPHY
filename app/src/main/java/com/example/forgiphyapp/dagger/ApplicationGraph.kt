@@ -9,7 +9,7 @@ import dagger.Component
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [Module::class])
+@Component(modules = [AppModule::class])
 interface ApplicationGraph {
 
     fun inject(gifListFragment: GifListFragment)

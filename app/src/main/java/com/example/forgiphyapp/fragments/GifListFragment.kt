@@ -17,55 +17,18 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.forgiphyapp.R
 import com.example.forgiphyapp.adapters.GifListPagingAdapter
-import com.example.forgiphyapp.dagger.App
+import com.example.forgiphyapp.App
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
 import com.example.forgiphyapp.vievModelsFactory.GifListViewModelFactory
-import com.example.forgiphyapp.viewModels.GifListViewModel
 import com.example.forgiphyapp.viewModels.GifListViewModelImpl
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/**
- * A simple [Fragment] subclass.
- * Use the [GifListFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class GifListFragment : Fragment() {
 
     private lateinit var viewModel: GifListViewModelImpl
-    private lateinit var adapter: GifListPagingAdapter
-
-    @Inject
-    lateinit var viewModelFactory: GifListViewModelFactory
-
-    var binding: FragmentGifListBinding? = null
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(
-            inflater,
-            R.layout.fragment_gif_list,
-            container,
-            false
-        )
-
-        (this.requireActivity().application as App).component.inject(this)
-
-        viewModel = ViewModelProvider(this, viewModelFactory).get(GifListViewModelImpl::class.java)
-
-        viewModel.saveGifs.observe(viewLifecycleOwner, {
-
-            if ((viewModel.actualData.isNullOrEmpty()) || (it.size == viewModel.actualData!!.size)) {
-                viewModel.actualData = it
-                viewModel.refresh()
-            } else viewModel.actualData = it
-        })
-
-        binding!!.viewModel = viewModel
-
-        adapter = GifListPagingAdapter(GifListPagingAdapter.onClickListener {
+    private val adapter: GifListPagingAdapter by lazy {
+        GifListPagingAdapter(GifListPagingAdapter.OnClickListener {
             if (!it.images.original.url.isNullOrEmpty())
                 this.findNavController()
                     .navigate(
@@ -77,19 +40,35 @@ class GifListFragment : Fragment() {
                             )
                     )
         })
+    }
 
-        adapter.addLoadStateListener { loadState ->
-            binding!!.progressBar.isVisible = loadState.refresh is LoadState.Loading
-            binding!!.imageList.isVisible = loadState.refresh !is LoadState.Loading
-            binding!!.buttonError.isVisible = loadState.refresh is LoadState.Error
-            binding!!.textError.isVisible = loadState.refresh is LoadState.Error
-        }
+    @Inject
+    lateinit var viewModelFactory: GifListViewModelFactory
 
-        viewModel.dataPagimg.observe(viewLifecycleOwner, {
-            lifecycleScope.launch {
-                adapter.submitData(it)
-            }
+    var binding: FragmentGifListBinding? = null
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.fragment_gif_list,
+            container,
+            false
+        )
+
+        (this.requireActivity().application as App).component.inject(this)
+
+        viewModel = ViewModelProvider(this, viewModelFactory).get(GifListViewModelImpl::class.java)
+
+        viewModel.savedGif.observe(viewLifecycleOwner, {
+            if ((viewModel.actualData.isNullOrEmpty()) || (it.size == viewModel.actualData!!.size)) {
+                viewModel.actualData = it
+                viewModel.refresh()
+            } else viewModel.actualData = it
         })
+
+        binding!!.viewModel = viewModel
 
         binding!!.imageList.adapter = adapter
 
@@ -100,6 +79,12 @@ class GifListFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+
+        viewModel.dataPaging.observe(viewLifecycleOwner, {
+            lifecycleScope.launch {
+                adapter.submitData(it)
+            }
+        })
         viewModel.linearOrGrid.observe(viewLifecycleOwner, {
             if (it) {
                 binding!!.imageList.layoutManager = GridLayoutManager(activity, 3)
@@ -118,6 +103,14 @@ class GifListFragment : Fragment() {
                 }
             }
         })
+
+
+        adapter.addLoadStateListener { loadState ->
+            binding!!.progressBar.isVisible = loadState.refresh is LoadState.Loading
+            binding!!.imageList.isVisible = loadState.refresh !is LoadState.Loading
+            binding!!.buttonError.isVisible = loadState.refresh is LoadState.Error
+            binding!!.textError.isVisible = loadState.refresh is LoadState.Error
+        }
     }
 
 

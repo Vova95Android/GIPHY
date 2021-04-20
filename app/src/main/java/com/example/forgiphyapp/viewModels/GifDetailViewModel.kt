@@ -1,9 +1,14 @@
 package com.example.forgiphyapp.viewModels
 
+import android.widget.ImageView
+import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import com.example.forgiphyapp.R
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabaseDao
 import kotlinx.coroutines.launch
@@ -35,6 +40,20 @@ class GifDetailViewModelImpl(
             data.active = false
             database.update(data)
             removeGifLiveData.value = true
+        }
+    }
+
+    fun setGifToScreen(img: ImageView, url: String) {
+        url.let {
+            val imgUri = it.toUri().buildUpon().scheme("https").build()
+            Glide.with(img.context)
+                .load(imgUri)
+                .apply(
+                    RequestOptions()
+                        .placeholder(R.drawable.loading_animation)
+                        .error(R.drawable.ic_broken_image)
+                )
+                .into(img)
         }
     }
 }
