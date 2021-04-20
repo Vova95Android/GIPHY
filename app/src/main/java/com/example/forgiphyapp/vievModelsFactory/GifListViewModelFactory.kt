@@ -6,8 +6,9 @@ import com.example.forgiphyapp.database.GifDatabaseDao
 import com.example.forgiphyapp.pagingApi.PagingSourceGif
 import com.example.forgiphyapp.viewModels.GifListViewModel
 import com.example.forgiphyapp.viewModels.GifListViewModelImpl
+import javax.inject.Inject
 
-class GifListViewModelFactory(
+class GifListViewModelFactory @Inject constructor(
     private val dataSource: GifDatabaseDao,
     var pagingSource: PagingSourceGif
 ) : ViewModelProvider.Factory {

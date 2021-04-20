@@ -14,7 +14,6 @@ interface ApplicationGraph {
 
     fun inject(gifListFragment: GifListFragment)
     fun inject(gifDetailFragment: GifDetailFragment)
-    fun inject(gifListViewModel: GifListViewModel)
 
     @Component.Factory
     interface Factory {

@@ -29,7 +29,7 @@ abstract class GifListViewModel : ViewModel() {
     abstract val dataPagimg: LiveData<PagingData<Data>>
 }
 
-class GifListViewModelImpl(val database: GifDatabaseDao, var pagingSource: PagingSourceGif) : GifListViewModel() {
+class GifListViewModelImpl(val database: GifDatabaseDao, val pagingSource: PagingSourceGif) : GifListViewModel() {
 
     override val linearOrGrid = MutableLiveData<Boolean>()
 

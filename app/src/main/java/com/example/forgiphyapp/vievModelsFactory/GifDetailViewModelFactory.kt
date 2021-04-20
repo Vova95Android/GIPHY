@@ -5,8 +5,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.forgiphyapp.database.GifDatabaseDao
 import com.example.forgiphyapp.viewModels.GifDetailViewModel
 import com.example.forgiphyapp.viewModels.GifDetailViewModelImpl
+import javax.inject.Inject
 
-class GifDetailViewModelFactory(
+class GifDetailViewModelFactory @Inject constructor(
     private val dataSource: GifDatabaseDao
 ) : ViewModelProvider.Factory {
 

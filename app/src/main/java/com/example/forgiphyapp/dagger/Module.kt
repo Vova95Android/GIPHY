@@ -17,20 +17,4 @@ class Module {
     fun getDatabase(context: Context): GifDatabaseDao {
         return GifDatabase.getInstance(context).gifDatabaseDao
     }
-
-    @Provides
-    fun getViewModelFactory(databaseDao: GifDatabaseDao, pagingSource: PagingSourceGif): GifListViewModelFactory {
-        return GifListViewModelFactory(databaseDao, pagingSource)
-    }
-
-    @Provides
-    fun getViewModelDetailFactory(databaseDao: GifDatabaseDao): GifDetailViewModelFactory {
-        return GifDetailViewModelFactory(databaseDao)
-    }
-
-    @Provides
-    fun getPagingSorce(databaseDao: GifDatabaseDao, api: GiphyAPI): PagingSourceGif{
-        return PagingSourceGif(databaseDao,api)
-    }
-
 }
