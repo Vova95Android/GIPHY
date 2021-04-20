@@ -8,14 +8,14 @@ import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabaseDao
 import kotlinx.coroutines.launch
 
-abstract class GifDetailViewModelImpl : ViewModel() {
+abstract class GifDetailViewModel : ViewModel() {
     abstract val urlLiveData: LiveData<String>
     abstract val removeGifLiveData: LiveData<Boolean>
 }
 
-class GifDetailViewModel(
+class GifDetailViewModelImpl(
     val database: GifDatabaseDao
-) : GifDetailViewModelImpl() {
+) : GifDetailViewModel() {
     override val urlLiveData = MutableLiveData<String>()
     override val removeGifLiveData = MutableLiveData<Boolean>()
 

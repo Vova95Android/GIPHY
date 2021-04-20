@@ -15,11 +15,12 @@ import com.example.forgiphyapp.database.GifDatabase
 import com.example.forgiphyapp.databinding.GifDetailFragmentBinding
 import com.example.forgiphyapp.vievModelsFactory.GifDetailViewModelFactory
 import com.example.forgiphyapp.viewModels.GifDetailViewModel
+import com.example.forgiphyapp.viewModels.GifDetailViewModelImpl
 import javax.inject.Inject
 
 class GifDetailFragment : Fragment() {
 
-    private lateinit var viewModel: GifDetailViewModel
+    private lateinit var viewModel: GifDetailViewModelImpl
     var binding: GifDetailFragmentBinding? = null
 
     @Inject
@@ -38,7 +39,7 @@ class GifDetailFragment : Fragment() {
 
         (this.requireActivity().application as App).component.inject(this)
 
-        viewModel = ViewModelProvider(this, viewModelFactory).get(GifDetailViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(GifDetailViewModelImpl::class.java)
         binding!!.viewModel = viewModel
         viewModel.setData(
             GifDetailFragmentArgs.fromBundle(requireArguments()).id,

@@ -8,15 +8,17 @@ import com.example.forgiphyapp.api.GiphyAPI
 import com.example.forgiphyapp.database.DataTransform
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabaseDao
+import javax.inject.Inject
 
 val api_key = "N8ddDH1PCkpXqWiwiprA3ghbUz7bRC3J"
 
-class PagingSourceGif(
-    val searchData: String,
-    val actualData: List<GifData>?,
-    val database: GifDatabaseDao
+class PagingSourceGif @Inject constructor(
+    val database: GifDatabaseDao,
+    val api: GiphyAPI
 ) : PagingSource<Int, Data>() {
     var offseData = 0
+    var searchData="A"
+    var actualData: List<GifData>?=null
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Data> {
         Log.i("PagingSource", "load size - " + params.loadSize)
@@ -27,7 +29,7 @@ class PagingSourceGif(
         var listSize = 0
         var listResultTemp = GifParams(listOf())
         while (listSize < limitTemp) {
-            val getPropetiesDeferred = GiphyAPI.retrofitService.getGifList(
+            val getPropetiesDeferred = api.retrofitService.getGifList(
                 api_key,
                 searchData,
                 limitTemp,
@@ -48,10 +50,10 @@ class PagingSourceGif(
 
             for (i in 0..listResultTemp.data.size - 1) {
                 if (actualData != null) {
-                    for (z in 0..actualData.size - 1) {
+                    for (z in 0..actualData!!.size - 1) {
                         if ((!actualData.isNullOrEmpty()) &&
-                            (actualData[z].id == listResultTemp.data[i].id) &&
-                            (!actualData[z].active)
+                            (actualData!![z].id == listResultTemp.data[i].id) &&
+                            (!actualData!![z].active)
                         ) {
                             Log.i("PagingSource", "data minus " + i)
                             listDataRemov = listDataRemov.plus(listResultTemp.data[i])
@@ -81,7 +83,7 @@ class PagingSourceGif(
         var findToDatabase = false
         for (gif_pos in data.data.indices) {
             if (actualData != null) {
-                for (element in actualData) {
+                for (element in actualData!!) {
                     if (element.id == data.data[gif_pos].id) findToDatabase = true
                 }
                 if (!findToDatabase) database.insert(
@@ -98,8 +100,12 @@ class PagingSourceGif(
         val data_temp = listOf<Data>()
         if (actualData != null)
             for (data_count in offset..offset + limit) {
-                data_temp.plus(DataTransform().getData(actualData[data_count]))
+                data_temp.plus(DataTransform().getData(actualData!![data_count]))
             }
         return GifParams(data_temp)
+    }
+
+    fun cleare() {
+        offseData = 0
     }
 }

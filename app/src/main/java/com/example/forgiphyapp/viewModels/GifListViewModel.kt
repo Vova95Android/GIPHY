@@ -6,6 +6,9 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.example.forgiphyapp.api.*
+import com.example.forgiphyapp.dagger.App
+import com.example.forgiphyapp.dagger.ApplicationGraph
+import com.example.forgiphyapp.dagger.DaggerApplicationGraph
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabaseDao
 import com.example.forgiphyapp.pagingApi.PagingSourceGif
@@ -13,9 +16,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
-abstract class GifListViewModelImpl : ViewModel() {
+abstract class GifListViewModel : ViewModel() {
 
 
     abstract val linearOrGrid: LiveData<Boolean>
@@ -25,7 +29,7 @@ abstract class GifListViewModelImpl : ViewModel() {
     abstract val dataPagimg: LiveData<PagingData<Data>>
 }
 
-class GifListViewModel(val database: GifDatabaseDao) : GifListViewModelImpl() {
+class GifListViewModelImpl(val database: GifDatabaseDao, var pagingSource: PagingSourceGif) : GifListViewModel() {
 
     override val linearOrGrid = MutableLiveData<Boolean>()
 
@@ -35,17 +39,16 @@ class GifListViewModel(val database: GifDatabaseDao) : GifListViewModelImpl() {
 
     var actualData: List<GifData>? = null
 
-    private var _searchData: String?
+    var _searchData="A"
 
     val saveGifs = database.getAllGifData()
 
+    var job: Job?=null
 
-    init {
-        _searchData = "A"
-    }
 
     fun refresh() {
-        viewModelScope.launch {
+        job?.cancel()
+        job=viewModelScope.launch {
             fetchGif().collect {
                 dataPagimg.value = it
             }
@@ -53,8 +56,11 @@ class GifListViewModel(val database: GifDatabaseDao) : GifListViewModelImpl() {
     }
 
     fun fetchGif(): Flow<PagingData<Data>> {
+        pagingSource.actualData=actualData
+        pagingSource.searchData=_searchData
+        pagingSource.cleare()
         return Pager(PagingConfig(pageSize = 20, enablePlaceholders = true))
-        { PagingSourceGif(_searchData!!, actualData, database) }
+        { pagingSource }
             .flow
             .cachedIn(viewModelScope)
     }

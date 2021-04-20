@@ -9,6 +9,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
+import javax.inject.Inject
 
 private const val BASE_URL = "https://api.giphy.com/v1/gifs/"
 
@@ -35,7 +36,8 @@ interface GiphyService {
     ): Deferred<GifParams>
 }
 
-object GiphyAPI {
+
+class GiphyAPI @Inject constructor(){
     val retrofitService: GiphyService by lazy {
         retrofit.create(GiphyService::class.java)
     }

@@ -6,7 +6,7 @@
     <data>
         <variable
             name="viewModel"
-            type="com.example.forgiphyapp.viewModels.GifListViewModel" />
+            type="com.example.forgiphyapp.viewModels.GifListViewModelImpl" />
     </data>
 
 

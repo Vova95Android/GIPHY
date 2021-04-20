@@ -21,6 +21,7 @@ import com.example.forgiphyapp.dagger.App
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
 import com.example.forgiphyapp.vievModelsFactory.GifListViewModelFactory
 import com.example.forgiphyapp.viewModels.GifListViewModel
+import com.example.forgiphyapp.viewModels.GifListViewModelImpl
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,7 +32,7 @@ import javax.inject.Inject
  */
 class GifListFragment : Fragment() {
 
-    private lateinit var viewModel: GifListViewModel
+    private lateinit var viewModel: GifListViewModelImpl
     private lateinit var adapter: GifListPagingAdapter
 
     @Inject
@@ -52,7 +53,7 @@ class GifListFragment : Fragment() {
 
         (this.requireActivity().application as App).component.inject(this)
 
-        viewModel = ViewModelProvider(this, viewModelFactory).get(GifListViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(GifListViewModelImpl::class.java)
 
         viewModel.saveGifs.observe(viewLifecycleOwner, {
 
