@@ -68,4 +68,20 @@ class GifListViewModelImpl(val database: GifDatabaseDao, val pagingSource: Pagin
         linearOrGridLiveData.value = set
     }
 
+    fun newDataOrRefresh(newData: List<GifData>) {
+        var needRefresh = false
+        if (!actualData.isNullOrEmpty())
+            for (dataPos in actualData!!.indices) {
+                if (newData[dataPos].active != actualData!![dataPos].active) needRefresh = true
+            }
+        else {
+            actualData = newData
+            refresh()
+        }
+        actualData = newData
+        if (needRefresh) {
+            refresh()
+        }
+    }
+
 }

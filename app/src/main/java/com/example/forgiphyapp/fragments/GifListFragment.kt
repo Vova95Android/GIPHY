@@ -31,14 +31,14 @@ class GifListFragment : Fragment() {
         GifListPagingAdapter(GifListPagingAdapter.OnClickListener {
             if (!it.images.original.url.isNullOrEmpty())
                 this.findNavController()
-                        .navigate(
-                                GifListFragmentDirections
-                                        .actionGifListFragmentToGifDetailFragment(
-                                                it.id,
-                                                it.images.original.url,
-                                                it.images.preview_gif.url
-                                        )
-                        )
+                    .navigate(
+                        GifListFragmentDirections
+                            .actionGifListFragmentToGifDetailFragment(
+                                it.id,
+                                it.images.original.url,
+                                it.images.preview_gif.url
+                            )
+                    )
         })
     }
 
@@ -48,14 +48,14 @@ class GifListFragment : Fragment() {
     var binding: FragmentGifListBinding? = null
 
     override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
         binding = DataBindingUtil.inflate(
-                inflater,
-                R.layout.fragment_gif_list,
-                container,
-                false
+            inflater,
+            R.layout.fragment_gif_list,
+            container,
+            false
         )
 
 
@@ -63,11 +63,8 @@ class GifListFragment : Fragment() {
 
         viewModel = ViewModelProvider(this, viewModelFactory).get(GifListViewModelImpl::class.java)
 
-        viewModel.savedGifLiveData.observe(viewLifecycleOwner, {
-            if ((viewModel.actualData.isNullOrEmpty()) || (it.size == viewModel.actualData!!.size)) {
-                viewModel.actualData = it
-                viewModel.refresh()
-            } else viewModel.actualData = it
+        viewModel.savedGifLiveData.observe(viewLifecycleOwner, { it ->
+            viewModel.newDataOrRefresh(it)
         })
 
         binding!!.viewModel = viewModel
@@ -108,10 +105,12 @@ class GifListFragment : Fragment() {
 
 
         adapter.addLoadStateListener { loadState ->
-            binding!!.progressBar.isVisible = loadState.refresh is LoadState.Loading
-            binding!!.imageList.isVisible = loadState.refresh !is LoadState.Loading
-            binding!!.buttonError.isVisible = loadState.refresh is LoadState.Error
-            binding!!.textError.isVisible = loadState.refresh is LoadState.Error
+            if (binding!=null) {
+                binding!!.progressBar.isVisible = loadState.refresh is LoadState.Loading
+                binding!!.imageList.isVisible = loadState.refresh !is LoadState.Loading
+                binding!!.buttonError.isVisible = loadState.refresh is LoadState.Error
+                binding!!.textError.isVisible = loadState.refresh is LoadState.Error
+            }
         }
     }
 
