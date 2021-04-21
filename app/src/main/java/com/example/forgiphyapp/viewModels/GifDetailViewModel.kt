@@ -35,7 +35,7 @@ class GifDetailViewModelImpl(
         removeGifLiveData.value = false
     }
 
-    fun onRemoveGif() {
+    fun removeGif() {
         viewModelScope.launch {
             data.active = false
             database.update(data)

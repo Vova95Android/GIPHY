@@ -46,6 +46,7 @@ class GifListFragment : Fragment() {
     lateinit var viewModelFactory: GifListViewModelFactory
 
     var binding: FragmentGifListBinding? = null
+
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
@@ -57,11 +58,12 @@ class GifListFragment : Fragment() {
                 false
         )
 
+
         (this.requireActivity().application as App).component.inject(this)
 
         viewModel = ViewModelProvider(this, viewModelFactory).get(GifListViewModelImpl::class.java)
 
-        viewModel.savedGif.observe(viewLifecycleOwner, {
+        viewModel.savedGifLiveData.observe(viewLifecycleOwner, {
             if ((viewModel.actualData.isNullOrEmpty()) || (it.size == viewModel.actualData!!.size)) {
                 viewModel.actualData = it
                 viewModel.refresh()
@@ -80,12 +82,12 @@ class GifListFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        viewModel.dataPaging.observe(viewLifecycleOwner, {
+        viewModel.dataPagingLiveData.observe(viewLifecycleOwner, {
             lifecycleScope.launch {
                 adapter.submitData(it)
             }
         })
-        viewModel.linearOrGrid.observe(viewLifecycleOwner, {
+        viewModel.linearOrGridLiveData.observe(viewLifecycleOwner, {
             if (it) {
                 binding!!.imageList.layoutManager = GridLayoutManager(activity, 3)
             } else {

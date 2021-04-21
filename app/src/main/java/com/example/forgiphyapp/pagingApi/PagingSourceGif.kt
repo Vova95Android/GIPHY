@@ -13,8 +13,8 @@ import javax.inject.Inject
 
 
 class PagingSourceGif @Inject constructor(
-        val database: GifDatabaseDao,
-        val api: GiphyService
+    private val database: GifDatabaseDao,
+    private val api: GiphyService
 ) : PagingSource<Int, Data>() {
     private val api_key = "N8ddDH1PCkpXqWiwiprA3ghbUz7bRC3J"
     private var offsetData = 0
@@ -31,12 +31,12 @@ class PagingSourceGif @Inject constructor(
         var listResultTemp = GifParams(listOf())
         while (listSize < limitTemp) {
             val getProperties = api.getGifListAsync(
-                    api_key,
-                    searchData,
-                    limitTemp,
-                    offsetData,
-                    "g",
-                    "en"
+                api_key,
+                searchData,
+                limitTemp,
+                offsetData,
+                "g",
+                "en"
             )
             try {
                 val listResult = getProperties.await()
@@ -54,9 +54,9 @@ class PagingSourceGif @Inject constructor(
         setGifToDatabase(listResultTemp)
         offsetData += params.loadSize
         return LoadResult.Page(
-                data = listResultTemp.data,
-                prevKey = null,
-                nextKey = offsetData
+            data = listResultTemp.data,
+            prevKey = null,
+            nextKey = offsetData
         )
     }
 
@@ -66,47 +66,28 @@ class PagingSourceGif @Inject constructor(
 
     private fun removeGif(listResultTemp: GifParams, actualData: List<GifData>): GifParams {
         var listDataRemove = listOf<Data>()
-        for (i in listResultTemp.data.indices) {
-            for (z in actualData.indices) {
-                if ((!actualData.isNullOrEmpty()) &&
-                        (actualData[z].id == listResultTemp.data[i].id) &&
-                        (!actualData[z].active)
-                ) {
-                    Log.i("PagingSource", "data minus " + i)
-                    listDataRemove = listDataRemove.plus(listResultTemp.data[i])
-                }
+
+        listResultTemp.data.forEach { data ->
+            val remove = actualData.firstOrNull {
+                data.id == it.id && !it.active
             }
+            if (remove != null) listDataRemove = listDataRemove.plus(data)
         }
         if (listDataRemove.isNotEmpty()) listResultTemp.data =
-                listResultTemp.data.minus(listDataRemove)
+            listResultTemp.data.minus(listDataRemove)
         return listResultTemp
     }
 
     private suspend fun setGifToDatabase(data: GifParams) {
-        var findToDatabase = false
-        for (gif_pos in data.data.indices) {
-            if (actualData != null) {
-                for (element in actualData!!) {
-                    if (element.id == data.data[gif_pos].id) findToDatabase = true
-                }
-                if (!findToDatabase) database.insert(
-                        DataTransform.getGifData(
-                                data.data[gif_pos],
-                                true
-                        )
-                )
+
+        data.data.forEach { dataTemp ->
+            val temp = actualData?.firstOrNull {
+                dataTemp.id == it.id
             }
+            if (temp == null) database.insert(DataTransform.getGifData(dataTemp, true))
         }
     }
 
-    private fun getUrlFromDatabase(limit: Int, offset: Int): GifParams {
-        val dataTemp = listOf<Data>()
-        if (actualData != null)
-            for (data_count in offset..offset + limit) {
-                dataTemp.plus(DataTransform.getData(actualData!![data_count]))
-            }
-        return GifParams(dataTemp)
-    }
 
     fun clear() {
         offsetData = 0

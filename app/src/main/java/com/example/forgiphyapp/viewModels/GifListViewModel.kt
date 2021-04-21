@@ -17,27 +17,27 @@ import kotlinx.coroutines.launch
 
 abstract class GifListViewModel : ViewModel() {
 
-    abstract val linearOrGrid: LiveData<Boolean>
+    abstract val linearOrGridLiveData: LiveData<Boolean>
 
-    abstract val dataParams: LiveData<GifParams>
+    abstract val dataParamsLiveData: LiveData<GifParams>
 
-    abstract val dataPaging: LiveData<PagingData<Data>>
+    abstract val dataPagingLiveData: LiveData<PagingData<Data>>
 }
 
 class GifListViewModelImpl(val database: GifDatabaseDao, val pagingSource: PagingSourceGif) :
-        GifListViewModel() {
+    GifListViewModel() {
 
-    override val linearOrGrid = MutableLiveData<Boolean>()
+    override val linearOrGridLiveData = MutableLiveData<Boolean>()
 
-    override val dataParams = MutableLiveData<GifParams>()
+    override val dataParamsLiveData = MutableLiveData<GifParams>()
 
-    override val dataPaging = MutableLiveData<PagingData<Data>>()
+    override val dataPagingLiveData = MutableLiveData<PagingData<Data>>()
 
     var actualData: List<GifData>? = null
 
-    private var _searchData = "A"
+    private var searchData = "A"
 
-    val savedGif = database.getAllGifData()
+    val savedGifLiveData = database.getAllGifData()
 
     private var job: Job? = null
 
@@ -45,27 +45,27 @@ class GifListViewModelImpl(val database: GifDatabaseDao, val pagingSource: Pagin
         job?.cancel()
         job = viewModelScope.launch {
             fetchGif().collect {
-                dataPaging.value = it
+                dataPagingLiveData.value = it
             }
         }
     }
 
     fun fetchGif(): Flow<PagingData<Data>> {
         pagingSource.actualData = actualData
-        pagingSource.searchData = _searchData
+        pagingSource.searchData = searchData
         pagingSource.clear()
         return Pager(PagingConfig(pageSize = 20, enablePlaceholders = true))
         { pagingSource }
-                .flow
-                .cachedIn(viewModelScope)
+            .flow
+            .cachedIn(viewModelScope)
     }
 
     fun searchNewData(data: String) {
-        _searchData = data
+        searchData = data
     }
 
-    fun onLinearOrGrid(set: Boolean) {
-        linearOrGrid.value = set
+    fun linearOrGrid(set: Boolean) {
+        linearOrGridLiveData.value = set
     }
 
 }
