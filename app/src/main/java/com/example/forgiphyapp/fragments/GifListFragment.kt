@@ -31,14 +31,14 @@ class GifListFragment : Fragment() {
         GifListPagingAdapter(GifListPagingAdapter.OnClickListener {
             if (!it.images.original.url.isNullOrEmpty())
                 this.findNavController()
-                    .navigate(
-                        GifListFragmentDirections
-                            .actionGifListFragmentToGifDetailFragment(
-                                it.id,
-                                it.images.original.url,
-                                it.images.preview_gif.url
-                            )
-                    )
+                        .navigate(
+                                GifListFragmentDirections
+                                        .actionGifListFragmentToGifDetailFragment(
+                                                it.id,
+                                                it.images.original.url,
+                                                it.images.preview_gif.url
+                                        )
+                        )
         })
     }
 
@@ -47,14 +47,14 @@ class GifListFragment : Fragment() {
 
     var binding: FragmentGifListBinding? = null
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View {
         binding = DataBindingUtil.inflate(
-            inflater,
-            R.layout.fragment_gif_list,
-            container,
-            false
+                inflater,
+                R.layout.fragment_gif_list,
+                container,
+                false
         )
 
         (this.requireActivity().application as App).component.inject(this)

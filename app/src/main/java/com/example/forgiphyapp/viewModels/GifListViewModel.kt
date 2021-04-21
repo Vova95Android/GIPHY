@@ -25,7 +25,7 @@ abstract class GifListViewModel : ViewModel() {
 }
 
 class GifListViewModelImpl(val database: GifDatabaseDao, val pagingSource: PagingSourceGif) :
-    GifListViewModel() {
+        GifListViewModel() {
 
     override val linearOrGrid = MutableLiveData<Boolean>()
 
@@ -56,8 +56,8 @@ class GifListViewModelImpl(val database: GifDatabaseDao, val pagingSource: Pagin
         pagingSource.clear()
         return Pager(PagingConfig(pageSize = 20, enablePlaceholders = true))
         { pagingSource }
-            .flow
-            .cachedIn(viewModelScope)
+                .flow
+                .cachedIn(viewModelScope)
     }
 
     fun searchNewData(data: String) {

@@ -25,26 +25,26 @@ class GifDetailFragment : Fragment() {
     lateinit var viewModelFactory: GifDetailViewModelFactory
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View {
         binding = DataBindingUtil.inflate(
-            inflater,
-            R.layout.gif_detail_fragment,
-            container,
-            false
+                inflater,
+                R.layout.gif_detail_fragment,
+                container,
+                false
         )
 
         (this.requireActivity().application as App).component.inject(this)
 
         viewModel =
-            ViewModelProvider(this, viewModelFactory).get(GifDetailViewModelImpl::class.java)
+                ViewModelProvider(this, viewModelFactory).get(GifDetailViewModelImpl::class.java)
 
         binding!!.viewModel = viewModel
         viewModel.setData(
-            GifDetailFragmentArgs.fromBundle(requireArguments()).id,
-            GifDetailFragmentArgs.fromBundle(requireArguments()).detailUrl,
-            GifDetailFragmentArgs.fromBundle(requireArguments()).previewUrl
+                GifDetailFragmentArgs.fromBundle(requireArguments()).id,
+                GifDetailFragmentArgs.fromBundle(requireArguments()).detailUrl,
+                GifDetailFragmentArgs.fromBundle(requireArguments()).previewUrl
         )
         viewModel.removeGifLiveData.observe(viewLifecycleOwner, Observer {
             if (it) {
@@ -54,8 +54,8 @@ class GifDetailFragment : Fragment() {
         })
 
         viewModel.setGifToScreen(
-            binding!!.imageView,
-            GifDetailFragmentArgs.fromBundle(requireArguments()).detailUrl
+                binding!!.imageView,
+                GifDetailFragmentArgs.fromBundle(requireArguments()).detailUrl
         )
         return binding!!.root
     }

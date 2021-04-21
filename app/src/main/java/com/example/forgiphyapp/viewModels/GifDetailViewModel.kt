@@ -19,7 +19,7 @@ abstract class GifDetailViewModel : ViewModel() {
 }
 
 class GifDetailViewModelImpl(
-    val database: GifDatabaseDao
+        val database: GifDatabaseDao
 ) : GifDetailViewModel() {
     override val urlLiveData = MutableLiveData<String>()
     override val removeGifLiveData = MutableLiveData<Boolean>()
@@ -47,13 +47,13 @@ class GifDetailViewModelImpl(
         url.let {
             val imgUri = it.toUri().buildUpon().scheme("https").build()
             Glide.with(img.context)
-                .load(imgUri)
-                .apply(
-                    RequestOptions()
-                        .placeholder(R.drawable.loading_animation)
-                        .error(R.drawable.ic_broken_image)
-                )
-                .into(img)
+                    .load(imgUri)
+                    .apply(
+                            RequestOptions()
+                                    .placeholder(R.drawable.loading_animation)
+                                    .error(R.drawable.ic_broken_image)
+                    )
+                    .into(img)
         }
     }
 }

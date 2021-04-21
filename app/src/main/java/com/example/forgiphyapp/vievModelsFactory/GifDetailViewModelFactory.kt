@@ -8,7 +8,7 @@ import com.example.forgiphyapp.viewModels.GifDetailViewModelImpl
 import javax.inject.Inject
 
 class GifDetailViewModelFactory @Inject constructor(
-    private val dataSource: GifDatabaseDao
+        private val dataSource: GifDatabaseDao
 ) : ViewModelProvider.Factory {
 
     @Suppress("unchecked_cast")

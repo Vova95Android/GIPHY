@@ -9,14 +9,14 @@ import com.example.forgiphyapp.viewModels.GifListViewModelImpl
 import javax.inject.Inject
 
 class GifListViewModelFactory @Inject constructor(
-    private val dataSource: GifDatabaseDao,
-    var pagingSource: PagingSourceGif
+        private val dataSource: GifDatabaseDao,
+        var pagingSource: PagingSourceGif
 ) : ViewModelProvider.Factory {
 
     @Suppress("unchecked_cast")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(GifListViewModelImpl::class.java)) {
-            return GifListViewModelImpl(dataSource,pagingSource) as T
+            return GifListViewModelImpl(dataSource, pagingSource) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
