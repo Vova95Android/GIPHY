@@ -58,7 +58,6 @@ class GifListFragment : Fragment() {
             false
         )
 
-
         (this.requireActivity().application as App).component.inject(this)
 
         viewModel = ViewModelProvider(this, viewModelFactory).get(GifListViewModelImpl::class.java)
@@ -103,17 +102,15 @@ class GifListFragment : Fragment() {
             }
         })
 
-
         adapter.addLoadStateListener { loadState ->
-            if (binding!=null) {
-                binding!!.progressBar.isVisible = loadState.refresh is LoadState.Loading
-                binding!!.imageList.isVisible = loadState.refresh !is LoadState.Loading
-                binding!!.buttonError.isVisible = loadState.refresh is LoadState.Error
-                binding!!.textError.isVisible = loadState.refresh is LoadState.Error
+            binding?.apply {
+                progressBar.isVisible = loadState.refresh is LoadState.Loading
+                imageList.isVisible = loadState.refresh !is LoadState.Loading
+                buttonError.isVisible = loadState.refresh is LoadState.Error
+                textError.isVisible = loadState.refresh is LoadState.Error
             }
         }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
