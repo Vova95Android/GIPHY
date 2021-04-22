@@ -97,7 +97,6 @@ class GifListFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if ((s != null) && (s.isNotEmpty()) && (count != before)) {
                     viewModel.searchNewData(s.toString())
-                    viewModel.refresh()
                 }
             }
         })
@@ -116,6 +115,5 @@ class GifListFragment : Fragment() {
         super.onDestroyView()
         binding = null
     }
-
 
 }

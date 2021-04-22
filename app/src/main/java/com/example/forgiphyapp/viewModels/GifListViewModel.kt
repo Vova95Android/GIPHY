@@ -50,7 +50,7 @@ class GifListViewModelImpl(val database: GifDatabaseDao, val pagingSource: Pagin
         }
     }
 
-    fun fetchGif(): Flow<PagingData<Data>> {
+    private fun fetchGif(): Flow<PagingData<Data>> {
         pagingSource.actualData = actualData
         pagingSource.searchData = searchData
         pagingSource.clear()
@@ -62,6 +62,7 @@ class GifListViewModelImpl(val database: GifDatabaseDao, val pagingSource: Pagin
 
     fun searchNewData(data: String) {
         searchData = data
+        refresh()
     }
 
     fun linearOrGrid(set: Boolean) {
@@ -70,15 +71,15 @@ class GifListViewModelImpl(val database: GifDatabaseDao, val pagingSource: Pagin
 
     fun newDataOrRefresh(newData: List<GifData>) {
         var needRefresh = false
-        if (!actualData.isNullOrEmpty())
+        if (!actualData.isNullOrEmpty()) {
             for (dataPos in actualData!!.indices) {
                 if (newData[dataPos].active != actualData!![dataPos].active) needRefresh = true
             }
-        else {
+            actualData = newData
+        } else {
             actualData = newData
             refresh()
         }
-        actualData = newData
         if (needRefresh) {
             refresh()
         }
