@@ -37,7 +37,7 @@ class GifListViewModelImpl(val database: GifDatabaseDao, val pagingSource: Pagin
 
     private var searchData = "A"
 
-    val savedGifLiveData = database.getAllGifData()
+    val savedGifLiveData = database.getAllGifDataLiveData()
 
     private var job: Job? = null
 

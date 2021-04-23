@@ -15,6 +15,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
 import com.example.forgiphyapp.R
 import com.example.forgiphyapp.adapters.GifListPagingAdapter
 import com.example.forgiphyapp.App
@@ -45,6 +47,10 @@ class GifListFragment : Fragment() {
     @Inject
     lateinit var viewModelFactory: GifListViewModelFactory
 
+
+    @Inject
+    lateinit var uploadWorkerRequest: WorkRequest
+
     var binding: FragmentGifListBinding? = null
 
     override fun onCreateView(
@@ -59,6 +65,9 @@ class GifListFragment : Fragment() {
         )
 
         (this.requireActivity().application as App).component.inject(this)
+
+
+        WorkManager.getInstance(this.requireActivity()).enqueue(uploadWorkerRequest)
 
         viewModel = ViewModelProvider(this, viewModelFactory).get(GifListViewModelImpl::class.java)
 
