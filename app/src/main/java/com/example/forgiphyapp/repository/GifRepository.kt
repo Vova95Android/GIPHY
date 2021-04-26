@@ -50,6 +50,7 @@ class GifRepository @Inject constructor(
         if (needRefresh) {
             getGif(searchData, viewModelScope)
         }
+        search=searchData
     }
 
     private fun getGif(searchData: String, viewModelScope: CoroutineScope){
