@@ -11,6 +11,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.forgiphyapp.R
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabaseDao
+import com.example.forgiphyapp.repository.GifRepository
 import kotlinx.coroutines.launch
 
 abstract class GifDetailViewModel : ViewModel() {
@@ -19,7 +20,7 @@ abstract class GifDetailViewModel : ViewModel() {
 }
 
 class GifDetailViewModelImpl(
-        val database: GifDatabaseDao
+    private val repository: GifRepository
 ) : GifDetailViewModel() {
     override val urlLiveData = MutableLiveData<String>()
     override val removeGifLiveData = MutableLiveData<Boolean>()
@@ -38,7 +39,7 @@ class GifDetailViewModelImpl(
     fun removeGif() {
         viewModelScope.launch {
             data.active = false
-            database.update(data)
+            repository.removeGif(data)
             removeGifLiveData.value = true
         }
     }

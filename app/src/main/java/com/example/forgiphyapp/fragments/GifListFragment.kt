@@ -71,8 +71,8 @@ class GifListFragment : Fragment() {
 
         viewModel = ViewModelProvider(this, viewModelFactory).get(GifListViewModelImpl::class.java)
 
-        viewModel.savedGifLiveData.observe(viewLifecycleOwner, { it ->
-            viewModel.newDataOrRefresh(it)
+        viewModel.savedGifLiveData.observe(viewLifecycleOwner, {
+            viewModel.newDataOrRefresh()
         })
 
         binding!!.viewModel = viewModel
