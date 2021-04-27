@@ -5,18 +5,24 @@ import androidx.room.Room
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkRequest
 import com.example.forgiphyapp.api.GiphyService
+import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabase
 import com.example.forgiphyapp.database.GifDatabaseDao
 import com.example.forgiphyapp.pagingApi.PagingSourceGif
 import com.example.forgiphyapp.repository.GifRepository
 import com.example.forgiphyapp.vievModelsFactory.GifDetailViewModelFactory
 import com.example.forgiphyapp.vievModelsFactory.GifListViewModelFactory
+import com.example.forgiphyapp.viewModels.GifDetailViewModel
+import com.example.forgiphyapp.viewModels.GifDetailViewModelImpl
+import com.example.forgiphyapp.viewModels.GifListViewModel
+import com.example.forgiphyapp.viewModels.GifListViewModelImpl
 import com.example.forgiphyapp.workManager.ClearDbWork
 import com.example.forgiphyapp.workManager.Notification
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.koin.android.ext.koin.androidContext
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -62,15 +68,21 @@ import java.util.concurrent.TimeUnit
                 .build()
         }
 
+        single { GifData("","","",true) }
+
         factory { PagingSourceGif(get(),get()) }
 
         factory { GifListViewModelFactory(get()) }
 
         factory { GifDetailViewModelFactory(get()) }
 
-        factory {GifRepository(get(),get())  }
+        single {GifRepository(get(),get())  }
 
         factory { Notification(androidContext()) }
+
+        viewModel <GifListViewModel>{ GifListViewModelImpl(get()) }
+
+        viewModel <GifDetailViewModel>{ GifDetailViewModelImpl(get(), get()) }
 
 
 

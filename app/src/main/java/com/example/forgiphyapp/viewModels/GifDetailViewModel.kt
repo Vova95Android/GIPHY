@@ -17,26 +17,26 @@ import kotlinx.coroutines.launch
 abstract class GifDetailViewModel : ViewModel() {
     abstract val urlLiveData: LiveData<String>
     abstract val removeGifLiveData: LiveData<Boolean>
+    abstract fun removeGif()
+    abstract fun setGifToScreen(img: ImageView, url: String)
 }
 
 class GifDetailViewModelImpl(
-    private val repository: GifRepository
+    private val repository: GifRepository,
+    private val data: GifData
 ) : GifDetailViewModel() {
     override val urlLiveData = MutableLiveData<String>()
     override val removeGifLiveData = MutableLiveData<Boolean>()
+//
+//    private lateinit var data: GifData
 
-    private lateinit var data: GifData
+//    fun setData(id: String, detailUrl: String, prewUrl: String?) {
+//        urlLiveData.value = detailUrl
+//        data = GifData(id, detailUrl, prewUrl, true)
+//    }
 
-    fun setData(id: String, detailUrl: String, prewUrl: String?) {
-        urlLiveData.value = detailUrl
-        data = GifData(id, detailUrl, prewUrl, true)
-    }
 
-    fun navigateOk() {
-        removeGifLiveData.value = false
-    }
-
-    fun removeGif() {
+    override fun removeGif() {
         viewModelScope.launch {
             data.active = false
             repository.removeGif(data)
@@ -44,7 +44,7 @@ class GifDetailViewModelImpl(
         }
     }
 
-    fun setGifToScreen(img: ImageView, url: String) {
+    override fun setGifToScreen(img: ImageView, url: String) {
         url.let {
             val imgUri = it.toUri().buildUpon().scheme("https").build()
             Glide.with(img.context)

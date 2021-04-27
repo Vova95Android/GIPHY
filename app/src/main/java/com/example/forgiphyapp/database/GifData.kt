@@ -8,11 +8,11 @@ import androidx.room.PrimaryKey
 data class GifData(
 
     @PrimaryKey(autoGenerate = false)
-    val id: String,
+    var id: String,
     @ColumnInfo(name = "full_url")
-    val full_url: String?,
+    var full_url: String?,
     @ColumnInfo(name = "preview_url")
-    val preview_url: String?,
+    var preview_url: String?,
     @ColumnInfo(name = "active")
     var active: Boolean
 )

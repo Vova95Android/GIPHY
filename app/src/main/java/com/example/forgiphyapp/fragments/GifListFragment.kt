@@ -23,16 +23,18 @@ import com.example.forgiphyapp.adapters.GifListPagingAdapter
 import com.example.forgiphyapp.App
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
 import com.example.forgiphyapp.vievModelsFactory.GifListViewModelFactory
+import com.example.forgiphyapp.viewModels.GifListViewModel
 import com.example.forgiphyapp.viewModels.GifListViewModelImpl
 import com.example.forgiphyapp.workManager.ClearDbWork
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.getViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class GifListFragment : Fragment() {
 
-    private lateinit var viewModel: GifListViewModelImpl
     private val adapter: GifListPagingAdapter by lazy {
         GifListPagingAdapter(GifListPagingAdapter.OnClickListener {
             if (!it.images.original.url.isNullOrEmpty())
@@ -55,8 +57,10 @@ class GifListFragment : Fragment() {
 //    @Inject
 //    lateinit var uploadWorkerRequest: WorkRequest
 
+    //private val viewModelFactory: GifListViewModelFactory by inject()
 
-    private val viewModelFactory: GifListViewModelFactory by inject()
+    private val viewModel: GifListViewModel by viewModel()
+
     private val uploadWorkerRequest: WorkRequest by inject()
 
     var binding: FragmentGifListBinding? = null
@@ -77,7 +81,7 @@ class GifListFragment : Fragment() {
 
         WorkManager.getInstance(this.requireActivity()).enqueue(uploadWorkerRequest)
 
-        viewModel = ViewModelProvider(this, viewModelFactory).get(GifListViewModelImpl::class.java)
+        //viewModel = ViewModelProvider(this, viewModelFactory).get(GifListViewModelImpl::class.java)
 
         viewModel.savedGifLiveData.observe(viewLifecycleOwner, {
             viewModel.newDataOrRefresh()

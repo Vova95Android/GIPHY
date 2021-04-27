@@ -13,6 +13,16 @@ abstract class GifListViewModel : ViewModel() {
     abstract val linearOrGridLiveData: LiveData<Boolean>
 
     abstract val dataPagingLiveData: LiveData<PagingData<Data>>
+
+    abstract val savedGifLiveData: LiveData<List<GifData>>
+
+    abstract fun searchNewData(data: String)
+
+    abstract fun refresh()
+
+    abstract fun linearOrGrid(set: Boolean)
+
+    abstract fun newDataOrRefresh()
 }
 
 class GifListViewModelImpl(private val repository: GifRepository) :
@@ -25,24 +35,24 @@ class GifListViewModelImpl(private val repository: GifRepository) :
 
     private var searchData = "A"
 
-    val savedGifLiveData: LiveData<List<GifData>>
+    override val savedGifLiveData: LiveData<List<GifData>>
         get() = repository.savedGifLiveData
 
 
-    fun refresh() {
+    override fun refresh() {
         repository.newDataOrRefresh(searchData,viewModelScope)
     }
 
-    fun searchNewData(data: String) {
+    override fun searchNewData(data: String) {
         searchData = data
         repository.newDataOrRefresh(searchData,viewModelScope)
     }
 
-    fun linearOrGrid(set: Boolean) {
+    override fun linearOrGrid(set: Boolean) {
         linearOrGridLiveData.value = set
     }
 
-    fun newDataOrRefresh() {
+    override fun newDataOrRefresh() {
         repository.newDataOrRefresh(searchData,viewModelScope)
     }
 

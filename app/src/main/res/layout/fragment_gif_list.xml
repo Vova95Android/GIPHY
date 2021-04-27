@@ -7,7 +7,7 @@
 
         <variable
             name="viewModel"
-            type="com.example.forgiphyapp.viewModels.GifListViewModelImpl" />
+            type="com.example.forgiphyapp.viewModels.GifListViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

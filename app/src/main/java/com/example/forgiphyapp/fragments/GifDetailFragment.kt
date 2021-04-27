@@ -11,20 +11,26 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.example.forgiphyapp.R
 import com.example.forgiphyapp.App
+import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.databinding.GifDetailFragmentBinding
 import com.example.forgiphyapp.vievModelsFactory.GifDetailViewModelFactory
+import com.example.forgiphyapp.viewModels.GifDetailViewModel
 import com.example.forgiphyapp.viewModels.GifDetailViewModelImpl
+import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import javax.inject.Inject
 
 class GifDetailFragment : Fragment() {
 
-    private lateinit var viewModel: GifDetailViewModelImpl
     var binding: GifDetailFragmentBinding? = null
 
 //    @Inject
 //    lateinit var viewModelFactory: GifDetailViewModelFactory
-    val viewModelFactory: GifDetailViewModelFactory by inject()
+    var data: GifData =get()
+
+    val viewModel: GifDetailViewModel by viewModel()
+    //val viewModelFactory: GifDetailViewModelFactory by inject()
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
@@ -36,22 +42,21 @@ class GifDetailFragment : Fragment() {
                 container,
                 false
         )
+        data.active=true
+        data.id=GifDetailFragmentArgs.fromBundle(requireArguments()).id
+        data.full_url=GifDetailFragmentArgs.fromBundle(requireArguments()).detailUrl
+        data.preview_url=GifDetailFragmentArgs.fromBundle(requireArguments()).previewUrl
+
 
        // (this.requireActivity().application as App).component.inject(this)
 
-        viewModel =
-                ViewModelProvider(this, viewModelFactory).get(GifDetailViewModelImpl::class.java)
+//        viewModel =
+//                ViewModelProvider(this, viewModelFactory).get(GifDetailViewModelImpl::class.java)
 
         binding!!.viewModel = viewModel
-        viewModel.setData(
-                GifDetailFragmentArgs.fromBundle(requireArguments()).id,
-                GifDetailFragmentArgs.fromBundle(requireArguments()).detailUrl,
-                GifDetailFragmentArgs.fromBundle(requireArguments()).previewUrl
-        )
         viewModel.removeGifLiveData.observe(viewLifecycleOwner, Observer {
             if (it) {
                 findNavController().popBackStack()
-                viewModel.navigateOk()
             }
         })
 

@@ -8,8 +8,8 @@ import androidx.work.WorkerParameters
 import com.example.forgiphyapp.App
 import com.example.forgiphyapp.MainActivity
 import com.example.forgiphyapp.database.GifDatabaseDao
-import org.koin.core.KoinComponent
-import org.koin.core.inject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import javax.inject.Inject
 
 class ClearDbWork(private val appContext: Context, workerParameters: WorkerParameters) :
