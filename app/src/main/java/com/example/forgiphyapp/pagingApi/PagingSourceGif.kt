@@ -12,7 +12,8 @@ import com.example.forgiphyapp.database.GifDatabaseDao
 import javax.inject.Inject
 
 
-class PagingSourceGif @Inject constructor(
+//class PagingSourceGif @Inject constructor(
+class PagingSourceGif (
     private val database: GifDatabaseDao,
     private val api: GiphyService
 ) : PagingSource<Int, Data>() {

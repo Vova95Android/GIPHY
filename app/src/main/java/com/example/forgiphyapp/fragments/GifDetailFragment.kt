@@ -37,7 +37,7 @@ class GifDetailFragment : Fragment() {
                 false
         )
 
-        (this.requireActivity().application as App).component.inject(this)
+       // (this.requireActivity().application as App).component.inject(this)
 
         viewModel =
                 ViewModelProvider(this, viewModelFactory).get(GifDetailViewModelImpl::class.java)

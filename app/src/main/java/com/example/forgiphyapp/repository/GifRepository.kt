@@ -19,8 +19,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
-class GifRepository @Inject constructor(
+//@Singleton
+//class GifRepository @Inject constructor(
+class GifRepository (
     private val dataBase: GifDatabaseDao,
     private var pagingSource: PagingSourceGif
 ) {

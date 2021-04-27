@@ -9,9 +9,9 @@ import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 
 class App : Application() {
-    val component: ApplicationGraph by lazy {
-        DaggerApplicationGraph.factory().create(applicationContext)
-    }
+//    val component: ApplicationGraph by lazy {
+//        DaggerApplicationGraph.factory().create(applicationContext)
+//    }
 
     override fun onCreate() {
         super.onCreate()

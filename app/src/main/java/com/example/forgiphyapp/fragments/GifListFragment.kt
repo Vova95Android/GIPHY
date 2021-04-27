@@ -56,8 +56,8 @@ class GifListFragment : Fragment() {
 //    lateinit var uploadWorkerRequest: WorkRequest
 
 
-    val viewModelFactory: GifListViewModelFactory by inject()
-    val uploadWorkerRequest: WorkRequest by inject()
+    private val viewModelFactory: GifListViewModelFactory by inject()
+    private val uploadWorkerRequest: WorkRequest by inject()
 
     var binding: FragmentGifListBinding? = null
 
@@ -72,7 +72,7 @@ class GifListFragment : Fragment() {
             false
         )
 
-        (this.requireActivity().application as App).component.inject(this)
+        //(this.requireActivity().application as App).component.inject(this)
 
 
         WorkManager.getInstance(this.requireActivity()).enqueue(uploadWorkerRequest)

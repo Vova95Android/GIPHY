@@ -8,7 +8,8 @@ import com.example.forgiphyapp.repository.GifRepository
 import com.example.forgiphyapp.viewModels.GifListViewModelImpl
 import javax.inject.Inject
 
-class GifListViewModelFactory @Inject constructor(
+//class GifListViewModelFactory @Inject constructor(
+class GifListViewModelFactory (
     private val repository: GifRepository
 ) : ViewModelProvider.Factory {
 
