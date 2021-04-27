@@ -122,4 +122,11 @@ dependencies {
 
     implementation "androidx.core:core-ktx:$version_notification"
 
+
+
+    implementation "org.koin:koin-android:$koin_version"
+
+    implementation "org.koin:koin-androidx-viewmodel:$koin_version"
+    implementation "org.koin:koin-core:$koin_version"
+
 }

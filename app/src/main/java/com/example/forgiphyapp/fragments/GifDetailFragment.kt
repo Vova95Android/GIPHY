@@ -14,6 +14,7 @@ import com.example.forgiphyapp.App
 import com.example.forgiphyapp.databinding.GifDetailFragmentBinding
 import com.example.forgiphyapp.vievModelsFactory.GifDetailViewModelFactory
 import com.example.forgiphyapp.viewModels.GifDetailViewModelImpl
+import org.koin.android.ext.android.inject
 import javax.inject.Inject
 
 class GifDetailFragment : Fragment() {
@@ -21,8 +22,9 @@ class GifDetailFragment : Fragment() {
     private lateinit var viewModel: GifDetailViewModelImpl
     var binding: GifDetailFragmentBinding? = null
 
-    @Inject
-    lateinit var viewModelFactory: GifDetailViewModelFactory
+//    @Inject
+//    lateinit var viewModelFactory: GifDetailViewModelFactory
+    val viewModelFactory: GifDetailViewModelFactory by inject()
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,

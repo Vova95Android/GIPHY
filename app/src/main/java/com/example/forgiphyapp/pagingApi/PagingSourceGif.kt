@@ -16,7 +16,7 @@ class PagingSourceGif @Inject constructor(
     private val database: GifDatabaseDao,
     private val api: GiphyService
 ) : PagingSource<Int, Data>() {
-    private val api_key = "N8ddDH1PCkpXqWiwiprA3ghbUz7bRC3J"
+    private val apiKey = "N8ddDH1PCkpXqWiwiprA3ghbUz7bRC3J"
     private var offsetData = 0
     var searchData = "A"
     var actualData: List<GifData>? = null
@@ -31,7 +31,7 @@ class PagingSourceGif @Inject constructor(
         var listResultTemp = GifParams(listOf())
         while (listSize < limitTemp) {
             val getProperties = api.getGifListAsync(
-                api_key,
+                apiKey,
                 searchData,
                 limitTemp,
                 offsetData,

@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import com.example.forgiphyapp.R
@@ -23,7 +24,10 @@ import com.example.forgiphyapp.App
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
 import com.example.forgiphyapp.vievModelsFactory.GifListViewModelFactory
 import com.example.forgiphyapp.viewModels.GifListViewModelImpl
+import com.example.forgiphyapp.workManager.ClearDbWork
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class GifListFragment : Fragment() {
@@ -44,12 +48,16 @@ class GifListFragment : Fragment() {
         })
     }
 
-    @Inject
-    lateinit var viewModelFactory: GifListViewModelFactory
+//    @Inject
+//    lateinit var viewModelFactory: GifListViewModelFactory
+//
+//
+//    @Inject
+//    lateinit var uploadWorkerRequest: WorkRequest
 
 
-    @Inject
-    lateinit var uploadWorkerRequest: WorkRequest
+    val viewModelFactory: GifListViewModelFactory by inject()
+    val uploadWorkerRequest: WorkRequest by inject()
 
     var binding: FragmentGifListBinding? = null
 
