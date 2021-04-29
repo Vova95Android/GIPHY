@@ -3,35 +3,28 @@ package com.example.forgiphyapp.fragments
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import com.example.forgiphyapp.R
 import com.example.forgiphyapp.adapters.GifListPagingAdapter
-import com.example.forgiphyapp.App
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
-import com.example.forgiphyapp.vievModelsFactory.GifListViewModelFactory
+import com.example.forgiphyapp.mvi.state.MainState
 import com.example.forgiphyapp.viewModels.GifListViewModel
-import com.example.forgiphyapp.viewModels.GifListViewModelImpl
-import com.example.forgiphyapp.workManager.ClearDbWork
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.getViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 
 class GifListFragment : Fragment() {
 
@@ -50,15 +43,6 @@ class GifListFragment : Fragment() {
         })
     }
 
-//    @Inject
-//    lateinit var viewModelFactory: GifListViewModelFactory
-//
-//
-//    @Inject
-//    lateinit var uploadWorkerRequest: WorkRequest
-
-    //private val viewModelFactory: GifListViewModelFactory by inject()
-
     private val viewModel: GifListViewModel by viewModel()
 
     private val uploadWorkerRequest: WorkRequest by inject()
@@ -76,14 +60,11 @@ class GifListFragment : Fragment() {
             false
         )
 
-        //(this.requireActivity().application as App).component.inject(this)
-
 
         WorkManager.getInstance(this.requireActivity()).enqueue(uploadWorkerRequest)
 
-        //viewModel = ViewModelProvider(this, viewModelFactory).get(GifListViewModelImpl::class.java)
-
         viewModel.savedGifLiveData.observe(viewLifecycleOwner, {
+
             viewModel.newDataOrRefresh()
         })
 
@@ -122,15 +103,63 @@ class GifListFragment : Fragment() {
             }
         })
 
+
+
+
         adapter.addLoadStateListener { loadState ->
             binding?.apply {
-                progressBar.isVisible = loadState.refresh is LoadState.Loading
-                imageList.isVisible = loadState.refresh !is LoadState.Loading
-                buttonError.isVisible = loadState.refresh is LoadState.Error
-                textError.isVisible = loadState.refresh is LoadState.Error
+//                progressBar.isVisible = loadState.refresh is LoadState.Loading
+//                imageList.isVisible = loadState.refresh !is LoadState.Loading
+//                buttonError.isVisible = loadState.refresh is LoadState.Error
+//                textError.isVisible = loadState.refresh is LoadState.Error
+                if (loadState.refresh !is LoadState.Loading) {
+                    viewModel!!.state.value = MainState.GifsLoad
+                }
+                if (loadState.refresh is LoadState.Error) {
+                    viewModel!!.state.value =
+                        MainState.Error((loadState.refresh as LoadState.Error).error.message)
+                }
+            }
+        }
+
+        observeViewModel()
+    }
+
+    private fun observeViewModel() {
+        lifecycleScope.launch {
+            try {
+                viewModel.state.collect { state ->
+                    when (state) {
+                        is MainState.Idle -> {
+                        }
+                        is MainState.GifsLoad -> {
+                            binding!!.progressBar.visibility = View.GONE
+                            binding!!.imageList.visibility = View.VISIBLE
+                            binding!!.buttonError.visibility = View.GONE
+                            binding!!.textError.visibility = View.GONE
+                        }
+                        is MainState.Loading -> {
+                            binding!!.progressBar.visibility = View.VISIBLE
+                            binding!!.imageList.visibility = View.GONE
+                            binding!!.buttonError.visibility = View.GONE
+                            binding!!.textError.visibility = View.GONE
+                        }
+                        is MainState.Error -> {
+                            binding!!.progressBar.visibility = View.GONE
+                            binding!!.imageList.visibility = View.GONE
+                            binding!!.buttonError.visibility = View.VISIBLE
+                            binding!!.textError.visibility = View.VISIBLE
+                            binding!!.textError.text = state.error
+                        }
+                    }
+                }
+
+            } catch (e: Exception) {
+                e.message?.let { Log.i("GifListFragment", it) }
             }
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -1,11 +1,18 @@
 package com.example.forgiphyapp.viewModels
 
-import androidx.lifecycle.*
+import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
-import com.example.forgiphyapp.api.*
+import com.example.forgiphyapp.api.Data
 import com.example.forgiphyapp.database.GifData
-import com.example.forgiphyapp.database.GifDatabaseDao
+import com.example.forgiphyapp.mvi.state.MainState
 import com.example.forgiphyapp.repository.GifRepository
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 
 abstract class GifListViewModel : ViewModel() {
@@ -23,10 +30,15 @@ abstract class GifListViewModel : ViewModel() {
     abstract fun linearOrGrid(set: Boolean)
 
     abstract fun newDataOrRefresh()
+    abstract fun handleIntent()
+
+    abstract val state: MutableStateFlow<MainState>
 }
 
 class GifListViewModelImpl(private val repository: GifRepository) :
     GifListViewModel() {
+
+    override val state = MutableStateFlow<MainState>(MainState.Loading)
 
     override val linearOrGridLiveData = MutableLiveData<Boolean>()
 
@@ -40,20 +52,66 @@ class GifListViewModelImpl(private val repository: GifRepository) :
 
 
     override fun refresh() {
-        repository.newDataOrRefresh(searchData,viewModelScope)
+        handleIntent()
     }
 
     override fun searchNewData(data: String) {
         searchData = data
-        repository.newDataOrRefresh(searchData,viewModelScope)
+        newDataOrRefresh()
     }
 
     override fun linearOrGrid(set: Boolean) {
         linearOrGridLiveData.value = set
     }
 
+    private var search = "B"
+
     override fun newDataOrRefresh() {
-        repository.newDataOrRefresh(searchData,viewModelScope)
+
+        val newData = savedGifLiveData.value
+        var needRefresh = false
+        if ((!repository.actualData.isNullOrEmpty()) && (!newData.isNullOrEmpty()) && (searchData == search)) {
+            for (dataPos in repository.actualData!!.indices) {
+                if (newData[dataPos].active != repository.actualData!![dataPos].active) needRefresh =
+                    true
+            }
+            repository.actualData = newData
+        } else {
+            repository.actualData = newData
+            handleIntent()
+        }
+        if (needRefresh) {
+            handleIntent()
+        }
+        search = searchData
+    }
+
+    init {
+        newDataOrRefresh()
+    }
+
+    private var job: Job? = null
+
+    override fun handleIntent() {
+        job?.cancel()
+        job = viewModelScope.launch {
+            fetchGif()
+        }
+
+    }
+
+    private suspend fun fetchGif() {
+        state.value = MainState.Loading
+        try {
+            repository.getGif(searchData, viewModelScope)
+        } catch (e: Exception) {
+            state.value = MainState.Error(e.message)
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        job?.cancel()
     }
 
 }

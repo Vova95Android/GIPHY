@@ -18,7 +18,7 @@ abstract class GifDetailViewModel : ViewModel() {
     abstract val urlLiveData: LiveData<String>
     abstract val removeGifLiveData: LiveData<Boolean>
     abstract fun removeGif()
-    abstract fun setGifToScreen(img: ImageView, url: String)
+    abstract fun setGifToScreen(img: ImageView)
 }
 
 class GifDetailViewModelImpl(
@@ -44,17 +44,17 @@ class GifDetailViewModelImpl(
         }
     }
 
-    override fun setGifToScreen(img: ImageView, url: String) {
-        url.let {
+    override fun setGifToScreen(img: ImageView) {
+        data.full_url?.let {
             val imgUri = it.toUri().buildUpon().scheme("https").build()
             Glide.with(img.context)
-                    .load(imgUri)
-                    .apply(
-                            RequestOptions()
-                                    .placeholder(R.drawable.loading_animation)
-                                    .error(R.drawable.ic_broken_image)
-                    )
-                    .into(img)
+                .load(imgUri)
+                .apply(
+                    RequestOptions()
+                        .placeholder(R.drawable.loading_animation)
+                        .error(R.drawable.ic_broken_image)
+                )
+                .into(img)
         }
     }
 }

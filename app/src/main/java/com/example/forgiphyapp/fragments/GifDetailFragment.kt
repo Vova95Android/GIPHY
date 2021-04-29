@@ -61,8 +61,7 @@ class GifDetailFragment : Fragment() {
         })
 
         viewModel.setGifToScreen(
-                binding!!.imageView,
-                GifDetailFragmentArgs.fromBundle(requireArguments()).detailUrl
+                binding!!.imageView
         )
         return binding!!.root
     }
