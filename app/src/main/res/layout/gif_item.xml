@@ -21,5 +21,14 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/imageLike"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_no_like"
+            app:layout_constraintBottom_toBottomOf="@id/gif_item"
+            app:layout_constraintEnd_toEndOf="@id/gif_item" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -30,5 +30,9 @@
             android:name="Preview_url"
             app:argType="string"
             app:nullable="true" />
+        <argument
+            android:name="Like"
+            app:argType="boolean"
+            app:nullable="false" />
     </fragment>
 </navigation>

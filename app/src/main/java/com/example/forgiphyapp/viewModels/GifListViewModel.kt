@@ -19,7 +19,7 @@ abstract class GifListViewModel : ViewModel() {
 
     abstract val linearOrGridLiveData: LiveData<Boolean>
 
-    abstract val dataPagingLiveData: LiveData<PagingData<Data>>
+    abstract val dataPagingLiveData: LiveData<PagingData<GifData>>
 
     abstract val savedGifLiveData: LiveData<List<GifData>>
 
@@ -30,9 +30,10 @@ abstract class GifListViewModel : ViewModel() {
     abstract fun linearOrGrid(set: Boolean)
 
     abstract fun newDataOrRefresh()
-    abstract fun handleIntent()
 
     abstract val state: MutableStateFlow<MainState>
+
+    abstract var newData: List<GifData>
 }
 
 class GifListViewModelImpl(private val repository: GifRepository) :
@@ -42,7 +43,7 @@ class GifListViewModelImpl(private val repository: GifRepository) :
 
     override val linearOrGridLiveData = MutableLiveData<Boolean>()
 
-    override val dataPagingLiveData: LiveData<PagingData<Data>>
+    override val dataPagingLiveData: LiveData<PagingData<GifData>>
         get() = repository.dataPagingLiveData
 
     private var searchData = "A"
@@ -51,8 +52,10 @@ class GifListViewModelImpl(private val repository: GifRepository) :
         get() = repository.savedGifLiveData
 
 
+    override var newData= listOf<GifData>()
+
     override fun refresh() {
-        handleIntent()
+        handleAction()
     }
 
     override fun searchNewData(data: String) {
@@ -68,20 +71,19 @@ class GifListViewModelImpl(private val repository: GifRepository) :
 
     override fun newDataOrRefresh() {
 
-        val newData = savedGifLiveData.value
         var needRefresh = false
         if ((!repository.actualData.isNullOrEmpty()) && (!newData.isNullOrEmpty()) && (searchData == search)) {
             for (dataPos in repository.actualData!!.indices) {
-                if (newData[dataPos].active != repository.actualData!![dataPos].active) needRefresh =
-                    true
+                if ((newData[dataPos].active != repository.actualData!![dataPos].active)||(newData[dataPos].like != repository.actualData!![dataPos].like))
+                    needRefresh = true
             }
             repository.actualData = newData
         } else {
             repository.actualData = newData
-            handleIntent()
+            handleAction()
         }
         if (needRefresh) {
-            handleIntent()
+            handleAction()
         }
         search = searchData
     }
@@ -92,7 +94,7 @@ class GifListViewModelImpl(private val repository: GifRepository) :
 
     private var job: Job? = null
 
-    override fun handleIntent() {
+    private fun handleAction() {
         job?.cancel()
         job = viewModelScope.launch {
             fetchGif()

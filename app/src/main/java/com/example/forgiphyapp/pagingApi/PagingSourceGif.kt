@@ -13,16 +13,25 @@ import javax.inject.Inject
 
 
 //class PagingSourceGif @Inject constructor(
-class PagingSourceGif (
+
+interface PagingSourceGif{
+
+    var searchData: String
+    var actualData: List<GifData>?
+    fun clear()
+}
+
+
+class PagingSourceGifImpl (
     private val database: GifDatabaseDao,
     private val api: GiphyService
-) : PagingSource<Int, Data>() {
+) : PagingSource<Int, GifData>(), PagingSourceGif {
     private val apiKey = "N8ddDH1PCkpXqWiwiprA3ghbUz7bRC3J"
     private var offsetData = 0
-    var searchData = "A"
-    var actualData: List<GifData>? = null
+    override var searchData = "A"
+    override var actualData: List<GifData>? = null
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Data> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, GifData> {
         Log.i("PagingSource", "load size - " + params.loadSize)
         Log.i("PagingSource", "key - " + params.key)
         var limitTemp = params.loadSize
@@ -52,16 +61,17 @@ class PagingSourceGif (
             listSize = listResultTemp.data.size
             limitTemp -= listSize
         }
-        setGifToDatabase(listResultTemp)
+//        for(i in listResultTemp.data.indices){list=list.plus(DataTransform.getGifData(listResultTemp.data[i],true,))}
+        val list=setGifToDatabase(listResultTemp)
         offsetData += params.loadSize
         return LoadResult.Page(
-            data = listResultTemp.data,
+            data = list,
             prevKey = null,
             nextKey = offsetData
         )
     }
 
-    override fun getRefreshKey(state: PagingState<Int, Data>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, GifData>): Int? {
         return null
     }
 
@@ -79,18 +89,23 @@ class PagingSourceGif (
         return listResultTemp
     }
 
-    private suspend fun setGifToDatabase(data: GifParams) {
-
+    private suspend fun setGifToDatabase(data: GifParams): List<GifData> {
+    var list: List<GifData> = listOf()
         data.data.forEach { dataTemp ->
             val temp = actualData?.firstOrNull {
                 dataTemp.id == it.id
             }
-            if (temp == null) database.insert(DataTransform.getGifData(dataTemp, true))
+            if (temp == null) {
+                database.insert(DataTransform.getGifData(dataTemp, true, false))
+                list= list.plus(DataTransform.getGifData(dataTemp, true, false))
+            }
+            else{list=list.plus(temp)}
         }
+        return list
     }
 
 
-    fun clear() {
+    override fun clear() {
         offsetData = 0
     }
 }

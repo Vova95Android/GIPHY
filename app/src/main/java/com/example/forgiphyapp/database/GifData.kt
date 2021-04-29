@@ -14,5 +14,7 @@ data class GifData(
     @ColumnInfo(name = "preview_url")
     var preview_url: String?,
     @ColumnInfo(name = "active")
-    var active: Boolean
+    var active: Boolean,
+    @ColumnInfo(name = "like")
+    var like: Boolean
 )

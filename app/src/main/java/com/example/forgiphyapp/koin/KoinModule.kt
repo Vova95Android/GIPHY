@@ -9,7 +9,11 @@ import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabase
 import com.example.forgiphyapp.database.GifDatabaseDao
 import com.example.forgiphyapp.pagingApi.PagingSourceGif
+import com.example.forgiphyapp.pagingApi.PagingSourceGifImpl
 import com.example.forgiphyapp.repository.GifRepository
+import com.example.forgiphyapp.repository.GifRepositoryImpl
+import com.example.forgiphyapp.test.GifRepositoryTest
+import com.example.forgiphyapp.test.PagingSourceTest
 import com.example.forgiphyapp.vievModelsFactory.GifDetailViewModelFactory
 import com.example.forgiphyapp.vievModelsFactory.GifListViewModelFactory
 import com.example.forgiphyapp.viewModels.GifDetailViewModel
@@ -31,23 +35,9 @@ import java.util.concurrent.TimeUnit
 
 
     val appModule= module {
-        single<GifDatabaseDao> {
-            var INSTANCE: GifDatabase? = null
-            synchronized(this) {
-                var instance = INSTANCE
-                if (instance == null) {
-                    instance = Room.databaseBuilder(
-                        androidContext(),
-                        GifDatabase::class.java,
-                        "gif_database"
-                    )
-                        .fallbackToDestructiveMigration()
-                        .build()
-                    INSTANCE = instance
-                }
-                return@single instance.gifDatabaseDao
-            }
-        }
+
+
+
         single<GiphyService> {  val baseUrl = "https://api.giphy.com/v1/gifs/"
 
             val moshi = Moshi.Builder()
@@ -68,15 +58,37 @@ import java.util.concurrent.TimeUnit
                 .build()
         }
 
-        single { GifData("","","",true) }
+       single { GifData("","","",true, false) }
 
-        factory { PagingSourceGif(get(),get()) }
+        single<GifDatabaseDao> {
+            var INSTANCE: GifDatabase? = null
+            synchronized(this) {
+                var instance = INSTANCE
+                if (instance == null) {
+                    instance = Room.databaseBuilder(
+                        androidContext(),
+                        GifDatabase::class.java,
+                        "gif_database"
+                    )
+                        .fallbackToDestructiveMigration()
+                        .build()
+                    INSTANCE = instance
+                }
+                return@single instance.gifDatabaseDao
+            }
+        }
+
+//        factory<PagingSourceGif> { PagingSourceGifImpl(get(),get()) }
+//        single<GifRepository> {GifRepositoryImpl(get(),get())  }
+
+        single<PagingSourceGif> { PagingSourceTest(get()) }
+        single<GifRepository> {GifRepositoryTest(get(),get())  }
+//        single <GifDatabaseDao> { DatabaseTest() }
 
         factory { GifListViewModelFactory(get()) }
 
         factory { GifDetailViewModelFactory(get()) }
 
-        single {GifRepository(get(),get())  }
 
         factory { Notification(androidContext()) }
 

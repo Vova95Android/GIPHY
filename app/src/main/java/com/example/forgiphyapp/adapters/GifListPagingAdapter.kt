@@ -2,6 +2,7 @@ package com.example.forgiphyapp.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.net.toUri
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
@@ -10,10 +11,12 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.forgiphyapp.R
 import com.example.forgiphyapp.api.Data
+import com.example.forgiphyapp.database.GifData
+import com.example.forgiphyapp.databinding.GifDetailFragmentBindingImpl
 import com.example.forgiphyapp.databinding.GifItemBinding
 
 class GifListPagingAdapter(private val listener: OnClickListener) :
-    PagingDataAdapter<Data, GifListPagingAdapter.GifListViewHolder>(DiffCallback()) {
+    PagingDataAdapter<GifData, GifListPagingAdapter.GifListViewHolder>(DiffCallback()) {
 
 
     override fun onBindViewHolder(holder: GifListViewHolder, position: Int) {
@@ -27,11 +30,14 @@ class GifListPagingAdapter(private val listener: OnClickListener) :
 
     class GifListViewHolder(private var binding: GifItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(data: Data, listener: OnClickListener) {
+        fun bind(data: GifData, listener: OnClickListener) {
             itemView.setOnClickListener { listener.onClick(data) }
             binding.executePendingBindings()
-            data.images.preview_gif.url?.let {
+            val drawable= if(data.like) AppCompatResources.getDrawable(binding.imageLike.context,R.drawable.ic_like)
+            else AppCompatResources.getDrawable(binding.imageLike.context,R.drawable.ic_no_like)
+            binding.imageLike.setImageDrawable(drawable)
 
+            data.preview_url?.let {
                 Glide.with(binding.gifItem.context)
                     .load(
                         it.toUri().buildUpon().scheme("https").build()
@@ -47,16 +53,16 @@ class GifListPagingAdapter(private val listener: OnClickListener) :
         }
     }
 
-    class OnClickListener(val clickListener: (data: Data) -> Unit) {
-        fun onClick(data: Data) = clickListener(data)
+    class OnClickListener(val clickListener: (data: GifData) -> Unit) {
+        fun onClick(data: GifData) = clickListener(data)
     }
 
-    class DiffCallback : DiffUtil.ItemCallback<Data>() {
-        override fun areItemsTheSame(oldItem: Data, newItem: Data): Boolean {
+    class DiffCallback : DiffUtil.ItemCallback<GifData>() {
+        override fun areItemsTheSame(oldItem: GifData, newItem: GifData): Boolean {
             return oldItem === newItem
         }
 
-        override fun areContentsTheSame(oldItem: Data, newItem: Data): Boolean {
+        override fun areContentsTheSame(oldItem: GifData, newItem: GifData): Boolean {
             return oldItem.id == newItem.id
         }
     }

@@ -30,14 +30,15 @@ class GifListFragment : Fragment() {
 
     private val adapter: GifListPagingAdapter by lazy {
         GifListPagingAdapter(GifListPagingAdapter.OnClickListener {
-            if (!it.images.original.url.isNullOrEmpty())
+            if (!it.full_url.isNullOrEmpty())
                 this.findNavController()
                     .navigate(
                         GifListFragmentDirections
                             .actionGifListFragmentToGifDetailFragment(
                                 it.id,
-                                it.images.original.url,
-                                it.images.preview_gif.url
+                                it.full_url!!,
+                                it.preview_url,
+                                it.like
                             )
                     )
         })
@@ -64,7 +65,8 @@ class GifListFragment : Fragment() {
         WorkManager.getInstance(this.requireActivity()).enqueue(uploadWorkerRequest)
 
         viewModel.savedGifLiveData.observe(viewLifecycleOwner, {
-
+            viewModel.newData=it
+            Log.i("GifListFragment", it.size.toString())
             viewModel.newDataOrRefresh()
         })
 

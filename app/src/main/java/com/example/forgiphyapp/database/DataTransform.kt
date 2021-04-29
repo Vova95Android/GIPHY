@@ -6,12 +6,13 @@ import com.example.forgiphyapp.api.Original
 
 abstract class DataTransform {
     companion object {
-        fun getGifData(dataGif: Data, active: Boolean): GifData {
+        fun getGifData(dataGif: Data, active: Boolean, like: Boolean): GifData {
             return GifData(
                     dataGif.id,
                     dataGif.images.original.url,
                     dataGif.images.preview_gif.url,
-                    active
+                    active,
+                    like
             )
         }
 
