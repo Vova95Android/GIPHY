@@ -29,6 +29,7 @@ class PagingSourceTest(private val database: GifDatabaseDao): PagingSource<Int, 
     override var searchData: String="A"
 
     override var actualData: List<GifData>?=null
+    override var likeGif=false
 
     override fun clear() {
         TODO("Not yet implemented")

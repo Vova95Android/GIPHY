@@ -33,11 +33,11 @@ class GifDetailViewModelImpl(
     private val repository: GifRepository,
     data: GifData
 ) : GifDetailViewModel() {
-    override var dataTemp=data
+    override var dataTemp = data
     override val urlLiveData = MutableLiveData<String>()
     override val removeGifLiveData = MutableLiveData<Boolean>()
     override val likeGifLiveData = MutableLiveData(dataTemp.like)
-    override val errorLikeGifLiveData= MutableLiveData<String?>(null)
+    override val errorLikeGifLiveData = MutableLiveData<String?>(null)
     //
 //    private lateinit var data: GifData
 
@@ -46,7 +46,7 @@ class GifDetailViewModelImpl(
 //        data = GifData(id, detailUrl, prewUrl, true)
 //    }
 
-    private var error: Boolean=false
+    private var error: Boolean = false
 
     override fun removeGif() {
         viewModelScope.launch {
@@ -58,16 +58,20 @@ class GifDetailViewModelImpl(
     }
 
     override fun likeGif() {
-        error=!error
-        Log.i("DetailViewModel",dataTemp.like.toString())
+        error = !error
+        Log.i("DetailViewModel", dataTemp.like.toString())
         viewModelScope.launch {
             try {
                 delay(500)
-                if (error){throw IllegalArgumentException("ошибка лайка")}
-                dataTemp.like=!dataTemp.like
+                if (error) {
+                    throw IllegalArgumentException("ошибка лайка")
+                }
+                dataTemp.like = !dataTemp.like
                 repository.likeGif(dataTemp)
-                likeGifLiveData.value=dataTemp.like
-            }catch (e: Exception){errorLikeGifLiveData.value=e.message}
+                likeGifLiveData.value = dataTemp.like
+            } catch (e: Exception) {
+                errorLikeGifLiveData.value = e.message
+            }
 
             cancel()
         }

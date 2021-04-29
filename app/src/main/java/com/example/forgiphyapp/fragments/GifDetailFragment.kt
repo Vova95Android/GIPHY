@@ -29,31 +29,31 @@ class GifDetailFragment : Fragment() {
 
     var binding: GifDetailFragmentBinding? = null
 
-//    @Inject
+    //    @Inject
 //    lateinit var viewModelFactory: GifDetailViewModelFactory
-    var data: GifData =get()
+    var data: GifData = get()
 
     val viewModel: GifDetailViewModel by viewModel()
     //val viewModelFactory: GifDetailViewModelFactory by inject()
 
     override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
         binding = DataBindingUtil.inflate(
-                inflater,
-                R.layout.gif_detail_fragment,
-                container,
-                false
+            inflater,
+            R.layout.gif_detail_fragment,
+            container,
+            false
         )
-        data.active=true
-        data.id=GifDetailFragmentArgs.fromBundle(requireArguments()).id
-        data.full_url=GifDetailFragmentArgs.fromBundle(requireArguments()).detailUrl
-        data.preview_url=GifDetailFragmentArgs.fromBundle(requireArguments()).previewUrl
-        data.like=GifDetailFragmentArgs.fromBundle(requireArguments()).like
+        data.active = true
+        data.id = GifDetailFragmentArgs.fromBundle(requireArguments()).id
+        data.full_url = GifDetailFragmentArgs.fromBundle(requireArguments()).detailUrl
+        data.preview_url = GifDetailFragmentArgs.fromBundle(requireArguments()).previewUrl
+        data.like = GifDetailFragmentArgs.fromBundle(requireArguments()).like
 
 
-       // (this.requireActivity().application as App).component.inject(this)
+        // (this.requireActivity().application as App).component.inject(this)
 
 //        viewModel =
 //                ViewModelProvider(this, viewModelFactory).get(GifDetailViewModelImpl::class.java)
@@ -66,16 +66,17 @@ class GifDetailFragment : Fragment() {
         })
 
         viewModel.setGifToScreen(
-                binding!!.imageView
+            binding!!.imageView
         )
 
-        viewModel.errorLikeGifLiveData.observe(viewLifecycleOwner,{
-            it?.let {  Toast.makeText(context,it,Toast.LENGTH_LONG).show()}
+        viewModel.errorLikeGifLiveData.observe(viewLifecycleOwner, {
+            it?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
         })
 
-        viewModel.likeGifLiveData.observe(viewLifecycleOwner,{
-            val drawable= if(it) context?.let { AppCompatResources.getDrawable(it,R.drawable.ic_like) }
-            else context?.let { AppCompatResources.getDrawable(it,R.drawable.ic_no_like) }
+        viewModel.likeGifLiveData.observe(viewLifecycleOwner, {
+            val drawable =
+                if (it) context?.let { AppCompatResources.getDrawable(it, R.drawable.ic_like) }
+                else context?.let { AppCompatResources.getDrawable(it, R.drawable.ic_no_like) }
             binding!!.imageLikeDetail.setImageDrawable(drawable)
         })
 

@@ -1,10 +1,8 @@
 package com.example.forgiphyapp .test
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.paging.*
-import com.example.forgiphyapp.api.Data
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabaseDao
 import com.example.forgiphyapp.pagingApi.PagingSourceGif
@@ -58,7 +56,11 @@ class GifRepositoryTest(private var pagingSource: PagingSourceGif, private val d
 
     override val dataPagingLiveData= MutableLiveData<PagingData<GifData>>()
 
-    override suspend fun getGif(searchData: String, viewModelScope: CoroutineScope) {
+    override suspend fun getGif(
+        searchData: String,
+        viewModelScope: CoroutineScope,
+        likeGif: Boolean
+    ) {
         if(savedGifLiveData.value==null){for (i in list.indices) database.insert(list[i])}
         pagingSource.actualData=actualData
         Pager(PagingConfig(pageSize = 10, enablePlaceholders = true))
@@ -75,5 +77,8 @@ class GifRepositoryTest(private var pagingSource: PagingSourceGif, private val d
 
     override suspend fun likeGif(gif: GifData) {
         database.update(gif)
+    }
+
+    override fun getLikeGif() {
     }
 }

@@ -33,72 +33,67 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
 
-
-    val appModule= module {
-
+val appModule = module {
 
 
-        single<GiphyService> {  val baseUrl = "https://api.giphy.com/v1/gifs/"
+    single<GiphyService> {
+        val baseUrl = "https://api.giphy.com/v1/gifs/"
 
-            val moshi = Moshi.Builder()
-                .add(KotlinJsonAdapterFactory())
-                .build()
+        val moshi = Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
+            .build()
 
-            val retrofit = Retrofit.Builder()
-                .addConverterFactory(MoshiConverterFactory.create(moshi))
-                .addCallAdapterFactory(CoroutineCallAdapterFactory())
-                .baseUrl(baseUrl)
-                .build()
-            return@single retrofit.create(GiphyService::class.java)
-        }
+        val retrofit = Retrofit.Builder()
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .addCallAdapterFactory(CoroutineCallAdapterFactory())
+            .baseUrl(baseUrl)
+            .build()
+        return@single retrofit.create(GiphyService::class.java)
+    }
 
-        factory <WorkRequest>{
-            PeriodicWorkRequestBuilder<ClearDbWork>(20, TimeUnit.MINUTES)
-                .setInitialDelay(5, TimeUnit.MINUTES)
-                .build()
-        }
+    factory<WorkRequest> {
+        PeriodicWorkRequestBuilder<ClearDbWork>(20, TimeUnit.MINUTES)
+            .setInitialDelay(5, TimeUnit.MINUTES)
+            .build()
+    }
 
-       single { GifData("","","",true, false) }
+    single { GifData("", "", "", true, false) }
 
-        single<GifDatabaseDao> {
-            var INSTANCE: GifDatabase? = null
-            synchronized(this) {
-                var instance = INSTANCE
-                if (instance == null) {
-                    instance = Room.databaseBuilder(
-                        androidContext(),
-                        GifDatabase::class.java,
-                        "gif_database"
-                    )
-                        .fallbackToDestructiveMigration()
-                        .build()
-                    INSTANCE = instance
-                }
-                return@single instance.gifDatabaseDao
+    single<GifDatabaseDao> {
+        var INSTANCE: GifDatabase? = null
+        synchronized(this) {
+            var instance = INSTANCE
+            if (instance == null) {
+                instance = Room.databaseBuilder(
+                    androidContext(),
+                    GifDatabase::class.java,
+                    "gif_database"
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
+                INSTANCE = instance
             }
+            return@single instance.gifDatabaseDao
         }
+    }
 
-//        factory<PagingSourceGif> { PagingSourceGifImpl(get(),get()) }
-//        single<GifRepository> {GifRepositoryImpl(get(),get())  }
+    factory<PagingSourceGif> { PagingSourceGifImpl(get(), get()) }
+    single<GifRepository> { GifRepositoryImpl(get(), get()) }
 
-        single<PagingSourceGif> { PagingSourceTest(get()) }
-        single<GifRepository> {GifRepositoryTest(get(),get())  }
+//        single<PagingSourceGif> { PagingSourceTest(get()) }
+//        single<GifRepository> {GifRepositoryTest(get(),get())  }
 //        single <GifDatabaseDao> { DatabaseTest() }
 
-        factory { GifListViewModelFactory(get()) }
+    factory { GifListViewModelFactory(get()) }
 
-        factory { GifDetailViewModelFactory(get()) }
-
-
-        factory { Notification(androidContext()) }
-
-        viewModel <GifListViewModel>{ GifListViewModelImpl(get()) }
-
-        viewModel <GifDetailViewModel>{ GifDetailViewModelImpl(get(), get()) }
+    factory { GifDetailViewModelFactory(get()) }
 
 
+    factory { Notification(androidContext()) }
+
+    viewModel<GifListViewModel> { GifListViewModelImpl(get()) }
+
+    viewModel<GifDetailViewModel> { GifDetailViewModelImpl(get(), get()) }
 
 
-
-
-    }
+}

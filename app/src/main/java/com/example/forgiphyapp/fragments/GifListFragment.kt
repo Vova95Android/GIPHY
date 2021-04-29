@@ -65,7 +65,7 @@ class GifListFragment : Fragment() {
         WorkManager.getInstance(this.requireActivity()).enqueue(uploadWorkerRequest)
 
         viewModel.savedGifLiveData.observe(viewLifecycleOwner, {
-            viewModel.newData=it
+            viewModel.newData = it
             Log.i("GifListFragment", it.size.toString())
             viewModel.newDataOrRefresh()
         })

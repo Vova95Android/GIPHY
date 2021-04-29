@@ -14,15 +14,16 @@ import javax.inject.Inject
 
 //class PagingSourceGif @Inject constructor(
 
-interface PagingSourceGif{
+interface PagingSourceGif {
 
     var searchData: String
     var actualData: List<GifData>?
+    var likeGif: Boolean
     fun clear()
 }
 
 
-class PagingSourceGifImpl (
+class PagingSourceGifImpl(
     private val database: GifDatabaseDao,
     private val api: GiphyService
 ) : PagingSource<Int, GifData>(), PagingSourceGif {
@@ -30,6 +31,7 @@ class PagingSourceGifImpl (
     private var offsetData = 0
     override var searchData = "A"
     override var actualData: List<GifData>? = null
+    override var likeGif = false
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, GifData> {
         Log.i("PagingSource", "load size - " + params.loadSize)
@@ -39,7 +41,7 @@ class PagingSourceGifImpl (
         else if (params.key != null) offsetData = params.key!!
         var listSize = 0
         var listResultTemp = GifParams(listOf())
-        while (listSize < limitTemp) {
+        if (!likeGif) while (listSize < limitTemp) {
             val getProperties = api.getGifListAsync(
                 apiKey,
                 searchData,
@@ -49,9 +51,11 @@ class PagingSourceGifImpl (
                 "en"
             )
             try {
+
                 val listResult = getProperties.await()
                 if (listSize == 0) listResultTemp = listResult
                 else listResultTemp.data = listResultTemp.data.plus(listResult.data)
+
             } catch (t: Throwable) {
                 Log.e("PagingSource", "error")
                 if (t.message != null) Log.e("PagingSource", t.message!!)
@@ -61,13 +65,30 @@ class PagingSourceGifImpl (
             listSize = listResultTemp.data.size
             limitTemp -= listSize
         }
-//        for(i in listResultTemp.data.indices){list=list.plus(DataTransform.getGifData(listResultTemp.data[i],true,))}
-        val list=setGifToDatabase(listResultTemp)
-        offsetData += params.loadSize
+        var list = listOf<GifData>()
+        if (likeGif) {
+            var count = 0
+            actualData!!.forEach {
+                if (it.like) {
+                    if ((count >= offsetData) && (count < offsetData + limitTemp)) list =
+                        list.plus(it)
+                    count++
+                }
+            }
+        } else {
+            list = setGifToDatabase(listResultTemp)
+        }
+
+        var offsetTemp: Int? = null
+
+        if (list.size >= limitTemp) {
+            offsetData += params.loadSize
+            offsetTemp = offsetData
+        }
         return LoadResult.Page(
             data = list,
             prevKey = null,
-            nextKey = offsetData
+            nextKey = offsetTemp
         )
     }
 
@@ -90,16 +111,17 @@ class PagingSourceGifImpl (
     }
 
     private suspend fun setGifToDatabase(data: GifParams): List<GifData> {
-    var list: List<GifData> = listOf()
+        var list: List<GifData> = listOf()
         data.data.forEach { dataTemp ->
             val temp = actualData?.firstOrNull {
                 dataTemp.id == it.id
             }
             if (temp == null) {
                 database.insert(DataTransform.getGifData(dataTemp, true, false))
-                list= list.plus(DataTransform.getGifData(dataTemp, true, false))
+                list = list.plus(DataTransform.getGifData(dataTemp, true, false))
+            } else {
+                list = list.plus(temp)
             }
-            else{list=list.plus(temp)}
         }
         return list
     }

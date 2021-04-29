@@ -1,12 +1,10 @@
 package com.example.forgiphyapp.viewModels
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
-import com.example.forgiphyapp.api.Data
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.mvi.state.MainState
 import com.example.forgiphyapp.repository.GifRepository
@@ -34,6 +32,8 @@ abstract class GifListViewModel : ViewModel() {
     abstract val state: MutableStateFlow<MainState>
 
     abstract var newData: List<GifData>
+
+    abstract fun getLikeGif()
 }
 
 class GifListViewModelImpl(private val repository: GifRepository) :
@@ -52,7 +52,7 @@ class GifListViewModelImpl(private val repository: GifRepository) :
         get() = repository.savedGifLiveData
 
 
-    override var newData= listOf<GifData>()
+    override var newData = listOf<GifData>()
 
     override fun refresh() {
         handleAction()
@@ -74,7 +74,7 @@ class GifListViewModelImpl(private val repository: GifRepository) :
         var needRefresh = false
         if ((!repository.actualData.isNullOrEmpty()) && (!newData.isNullOrEmpty()) && (searchData == search)) {
             for (dataPos in repository.actualData!!.indices) {
-                if ((newData[dataPos].active != repository.actualData!![dataPos].active)||(newData[dataPos].like != repository.actualData!![dataPos].like))
+                if ((newData[dataPos].active != repository.actualData!![dataPos].active) || (newData[dataPos].like != repository.actualData!![dataPos].like))
                     needRefresh = true
             }
             repository.actualData = newData
@@ -102,10 +102,17 @@ class GifListViewModelImpl(private val repository: GifRepository) :
 
     }
 
+    override fun getLikeGif() {
+        job?.cancel()
+        job = viewModelScope.launch {
+            repository.getGif("", viewModelScope, true)
+        }
+    }
+
     private suspend fun fetchGif() {
         state.value = MainState.Loading
         try {
-            repository.getGif(searchData, viewModelScope)
+            repository.getGif(searchData, viewModelScope, false)
         } catch (e: Exception) {
             state.value = MainState.Error(e.message)
         }
