@@ -1,5 +1,6 @@
 package com.example.forgiphyapp.viewModels
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,7 @@ import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.mvi.state.MainState
 import com.example.forgiphyapp.repository.GifRepository
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -17,9 +19,9 @@ abstract class GifListViewModel : ViewModel() {
 
     abstract val linearOrGridLiveData: LiveData<Boolean>
 
-    abstract val dataPagingLiveData: LiveData<PagingData<GifData>>
-
     abstract val savedGifLiveData: LiveData<List<GifData>>
+
+    abstract var previousActiveButton: MutableLiveData<Boolean>
 
     abstract fun searchNewData(data: String)
 
@@ -34,24 +36,28 @@ abstract class GifListViewModel : ViewModel() {
     abstract var newData: List<GifData>
 
     abstract fun getLikeGif()
+
+    abstract fun nextPage()
+
+    abstract fun previousPage()
+
+
 }
 
 class GifListViewModelImpl(private val repository: GifRepository) :
     GifListViewModel() {
 
-    override val state = MutableStateFlow<MainState>(MainState.Loading)
+    override val state = MutableStateFlow(MainState())
 
     override val linearOrGridLiveData = MutableLiveData<Boolean>()
 
-    override val dataPagingLiveData: LiveData<PagingData<GifData>>
-        get() = repository.dataPagingLiveData
-
-    private var searchData = "A"
+    private var searchData = "H"
     private var likeGif = false
 
     override val savedGifLiveData: LiveData<List<GifData>>
         get() = repository.savedGifLiveData
 
+    override var previousActiveButton = MutableLiveData(false)
 
     override var newData = listOf<GifData>()
 
@@ -84,7 +90,7 @@ class GifListViewModelImpl(private val repository: GifRepository) :
             handleAction()
         }
         if (needRefresh) {
-            handleAction()
+            handleAction(needLoad = false)
         }
         search = searchData
     }
@@ -95,28 +101,35 @@ class GifListViewModelImpl(private val repository: GifRepository) :
 
     private var job: Job? = null
 
-    private fun handleAction() {
+    private fun handleAction(
+        nextPage: Boolean? = null,
+        likeGif: Boolean = false,
+        needLoad: Boolean = true
+    ) {
         job?.cancel()
+        state.value = MainState(isLoading = needLoad)
         job = viewModelScope.launch {
-            fetchGif()
+            try {
+                state.value = MainState(data = repository.getGif(searchData, likeGif, nextPage))
+                previousActiveButton.value = repository.previousButtonIsActive()
+                delay(500)
+            } catch (e: Exception) {
+                state.value = MainState(error = e.message)
+            }
         }
     }
 
     override fun getLikeGif() {
-        job?.cancel()
-        job = viewModelScope.launch {
-            likeGif = !likeGif
-            repository.getGif(searchData, viewModelScope, likeGif)
-        }
+        likeGif = !likeGif
+        handleAction(likeGif = likeGif)
     }
 
-    private suspend fun fetchGif() {
-        state.value = MainState.Loading
-        try {
-            repository.getGif(searchData, viewModelScope, false)
-        } catch (e: Exception) {
-            state.value = MainState.Error
-        }
+    override fun nextPage() {
+        handleAction(true)
+    }
+
+    override fun previousPage() {
+        handleAction(false)
     }
 
     override fun onCleared() {

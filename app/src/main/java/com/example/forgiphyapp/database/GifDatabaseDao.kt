@@ -15,7 +15,7 @@ interface GifDatabaseDao {
     fun getAllGifDataLiveData(): LiveData<List<GifData>>
 
     @Query("SELECT * FROM gif_data")
-    fun getAllGifData(): List<GifData>
+    suspend fun getAllGifData(): List<GifData>
 
     @Delete(entity = GifData::class)
     fun deleteAllGif(data: List<GifData>)

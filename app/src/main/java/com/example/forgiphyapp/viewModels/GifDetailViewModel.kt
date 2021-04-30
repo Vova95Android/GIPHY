@@ -63,9 +63,9 @@ class GifDetailViewModelImpl(
         viewModelScope.launch {
             try {
                 delay(500)
-                if (error) {
-                    throw IllegalArgumentException("ошибка лайка")
-                }
+//                if (error) {
+//                    throw IllegalArgumentException("ошибка лайка")
+//                }
                 dataTemp.like = !dataTemp.like
                 repository.likeGif(dataTemp)
                 likeGifLiveData.value = dataTemp.like

@@ -1,14 +1,14 @@
 package com.example.forgiphyapp.repository
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.paging.*
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabaseDao
-import com.example.forgiphyapp.pagingApi.PagingSourceGif
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
+import com.example.forgiphyapp.useCases.LikeGifUseCase
+import com.example.forgiphyapp.useCases.LoadGifUseCase
+import com.example.forgiphyapp.useCases.RemoveGifUseCase
 
 
 interface GifRepository {
@@ -18,16 +18,19 @@ interface GifRepository {
 
     val dataPagingLiveData: MutableLiveData<PagingData<GifData>>
 
-    suspend fun getGif(searchData: String, viewModelScope: CoroutineScope, likeGif: Boolean)
+    suspend fun getGif(search: String, likeGif: Boolean, nextPage: Boolean? = null): List<GifData>
+
+    fun previousButtonIsActive(): Boolean
 
     suspend fun removeGif(gif: GifData)
     suspend fun likeGif(gif: GifData)
-    fun getLikeGif()
 }
 
 class GifRepositoryImpl(
-    private val dataBase: GifDatabaseDao,
-    private var pagingSource: PagingSourceGif
+    dataBase: GifDatabaseDao,
+    private val loadGifUseCase: LoadGifUseCase,
+    private val removeGifUseCase: RemoveGifUseCase,
+    private val likeGifUseCase: LikeGifUseCase
 ) : GifRepository {
 
     override val savedGifLiveData = dataBase.getAllGifDataLiveData()
@@ -36,44 +39,82 @@ class GifRepositoryImpl(
 
     override val dataPagingLiveData = MutableLiveData<PagingData<GifData>>()
 
+    private var offsetData = 0
+    private var limit = 30
+    private var startPage = 0
+
+    override fun previousButtonIsActive(): Boolean {
+        return startPage >= limit
+    }
+
+    private var endPage = 0
+    private var searchData = "A"
+
 
     override suspend fun getGif(
-        searchData: String,
-        viewModelScope: CoroutineScope,
-        likeGif: Boolean
-    ) {
+        search: String,
+        likeGif: Boolean,
+        nextPage: Boolean?
+    ): List<GifData> {
 
-        fetchGif(searchData, viewModelScope, likeGif).collect {
-            dataPagingLiveData.value = it
+        var limitTemp = limit
+
+        if (search != searchData) {
+            offsetData = 0
+            startPage = 0
+            endPage = 0
         }
-    }
+        searchData = search
 
-    private fun fetchGif(
-        searchData: String,
-        viewModelScope: CoroutineScope,
-        likeGif: Boolean
-    ): Flow<PagingData<GifData>> {
-        pagingSource.actualData = actualData
-        pagingSource.searchData = searchData
-        pagingSource.likeGif = likeGif
-        pagingSource.clear()
-        return Pager(PagingConfig(pageSize = 20, enablePlaceholders = true))
-        { pagingSource as PagingSource<Int, GifData> }
-            .flow
-            .cachedIn(viewModelScope)
-    }
+        when (nextPage) {
+            true -> {
+                startPage = endPage+1
+                offsetData = startPage
+            }
+            false -> {
+                endPage = startPage-1
+                offsetData = endPage - limit
+            }
+            null -> {
+                offsetData = startPage
+            }
+        }
 
-    override fun getLikeGif() {
-
+        var listSize = 0
+        var listResult = listOf<GifData>()
+        while (listSize < limit) {
+            val listResultTemp =
+                if (!likeGif) loadGifUseCase.getGif(searchData, limitTemp, offsetData)
+                else likeGifUseCase.getListLikeGif(offsetData, limitTemp)
+            if ((nextPage == true) || (nextPage == null)) {
+                listResult = listResult.plus(listResultTemp)
+                listSize = listResult.size
+                offsetData += limitTemp
+                limitTemp = limit - listSize
+            } else if (nextPage == false) {
+                listResult = listResultTemp.plus(listResult)
+                listSize = listResult.size
+                limitTemp = limit - listSize
+                offsetData -= limitTemp
+            }
+            if (offsetData < 0) {
+                listSize = limit
+                offsetData = 0
+            }
+            if ((savedGifLiveData.value?.size!! < offsetData) && (likeGif)) listSize = limit
+        }
+        if ((nextPage == true) || (nextPage == null)) endPage = offsetData
+        else startPage = offsetData + limitTemp
+        return listResult
     }
 
 
     override suspend fun removeGif(gif: GifData) {
-        dataBase.update(gif)
+        removeGifUseCase.removeGif(gif)
     }
 
     override suspend fun likeGif(gif: GifData) {
-        dataBase.update(gif)
+        likeGifUseCase.likeGif(gif)
     }
 
 }

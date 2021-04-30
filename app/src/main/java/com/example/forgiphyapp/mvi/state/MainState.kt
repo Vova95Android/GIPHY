@@ -1,11 +1,9 @@
 package com.example.forgiphyapp.mvi.state
 
-import androidx.paging.PagingData
-import com.example.forgiphyapp.api.Data
+import com.example.forgiphyapp.database.GifData
 
-open class MainState {
-    object Idle : MainState()
-    object Loading : MainState()
-    object GifsLoad : MainState()
-    object Error : MainState()
-}
+data class MainState(
+    val isLoading: Boolean=false,
+    val data: List<GifData> = listOf(),
+    val error: String?=null
+)

@@ -11,15 +11,13 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import com.example.forgiphyapp.R
-import com.example.forgiphyapp.adapters.GifListPagingAdapter
+import com.example.forgiphyapp.adapters.GifListAdapter
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
-import com.example.forgiphyapp.mvi.state.MainState
 import com.example.forgiphyapp.viewModels.GifListViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -28,8 +26,8 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class GifListFragment : Fragment() {
 
-    private val adapter: GifListPagingAdapter by lazy {
-        GifListPagingAdapter(GifListPagingAdapter.OnClickListener {
+    private val adapter: GifListAdapter by lazy {
+        GifListAdapter(GifListAdapter.OnClickListener {
             if (!it.full_url.isNullOrEmpty())
                 this.findNavController()
                     .navigate(
@@ -41,11 +39,7 @@ class GifListFragment : Fragment() {
                                 it.like
                             )
                     )
-        },
-            GifListPagingAdapter.OnErrorListener {
-                if (it) viewModel.state.value = MainState.Error
-                else viewModel.state.value = MainState.GifsLoad
-            })
+        })
     }
 
     private val viewModel: GifListViewModel by viewModel()
@@ -85,12 +79,6 @@ class GifListFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-
-        viewModel.dataPagingLiveData.observe(viewLifecycleOwner, {
-            lifecycleScope.launch {
-                adapter.submitData(it)
-            }
-        })
         viewModel.linearOrGridLiveData.observe(viewLifecycleOwner, {
             if (it) {
                 binding!!.imageList.layoutManager = GridLayoutManager(activity, 3)
@@ -98,6 +86,12 @@ class GifListFragment : Fragment() {
                 binding!!.imageList.layoutManager = LinearLayoutManager(activity)
             }
         })
+
+        binding!!.refreshLayout.setOnRefreshListener {
+            viewModel.refresh()
+            binding!!.refreshLayout.isRefreshing = false
+        }
+
 
         binding!!.editTextNewData.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {}
@@ -109,24 +103,6 @@ class GifListFragment : Fragment() {
             }
         })
 
-
-
-
-        adapter.addLoadStateListener { loadState ->
-            binding?.apply {
-//                progressBar.isVisible = loadState.refresh is LoadState.Loading
-//                imageList.isVisible = loadState.refresh !is LoadState.Loading
-//                buttonError.isVisible = loadState.refresh is LoadState.Error
-//                textError.isVisible = loadState.refresh is LoadState.Error
-                if (loadState.refresh !is LoadState.Loading) {
-                    viewModel!!.state.value = MainState.GifsLoad
-                }
-                if (loadState.refresh is LoadState.Error) {
-                    viewModel!!.state.value = MainState.Error
-                }
-            }
-        }
-
         observeViewModel()
     }
 
@@ -134,30 +110,27 @@ class GifListFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 viewModel.state.collect { state ->
-                    when (state) {
-                        is MainState.Idle -> {
-                        }
-                        is MainState.GifsLoad -> {
-                            binding!!.progressBar.visibility = View.GONE
-                            binding!!.imageList.visibility = View.VISIBLE
-                            binding!!.buttonError.visibility = View.GONE
-                            binding!!.textError.visibility = View.GONE
-                        }
-                        is MainState.Loading -> {
-                            binding!!.progressBar.visibility = View.VISIBLE
-                            binding!!.imageList.visibility = View.GONE
-                            binding!!.buttonError.visibility = View.GONE
-                            binding!!.textError.visibility = View.GONE
-                        }
-                        is MainState.Error -> {
-                            binding!!.progressBar.visibility = View.GONE
-                            binding!!.imageList.visibility = View.VISIBLE
-                            binding!!.buttonError.visibility = View.VISIBLE
-                            binding!!.textError.visibility = View.VISIBLE
-                        }
+                    if (state.isLoading) {
+                        binding!!.progressBar.visibility = View.VISIBLE
+                        binding!!.imageList.visibility = View.GONE
+                        binding!!.buttonError.visibility = View.GONE
+                        binding!!.textError.visibility = View.GONE
+                    }
+                    if (!state.data.isNullOrEmpty()) {
+                        binding!!.progressBar.visibility = View.GONE
+                        binding!!.imageList.visibility = View.VISIBLE
+                        binding!!.buttonError.visibility = View.GONE
+                        binding!!.textError.visibility = View.GONE
+                        adapter.submitList(state.data)
+                    }
+                    if (!state.error.isNullOrEmpty()) {
+                        binding!!.progressBar.visibility = View.GONE
+                        binding!!.imageList.visibility = View.VISIBLE
+                        binding!!.buttonError.visibility = View.VISIBLE
+                        binding!!.textError.visibility = View.VISIBLE
+                        binding!!.textError.text = state.error
                     }
                 }
-
             } catch (e: Exception) {
                 e.message?.let { Log.i("GifListFragment", it) }
             }

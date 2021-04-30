@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkRequest
+import com.example.forgiphyapp.api.GifDataSource
+import com.example.forgiphyapp.api.GifDataSourceImpl
 import com.example.forgiphyapp.api.GiphyService
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabase
@@ -12,8 +14,8 @@ import com.example.forgiphyapp.pagingApi.PagingSourceGif
 import com.example.forgiphyapp.pagingApi.PagingSourceGifImpl
 import com.example.forgiphyapp.repository.GifRepository
 import com.example.forgiphyapp.repository.GifRepositoryImpl
-import com.example.forgiphyapp.test.GifRepositoryTest
 import com.example.forgiphyapp.test.PagingSourceTest
+import com.example.forgiphyapp.useCases.*
 import com.example.forgiphyapp.vievModelsFactory.GifDetailViewModelFactory
 import com.example.forgiphyapp.vievModelsFactory.GifListViewModelFactory
 import com.example.forgiphyapp.viewModels.GifDetailViewModel
@@ -78,7 +80,7 @@ val appModule = module {
     }
 
     factory<PagingSourceGif> { PagingSourceGifImpl(get(), get()) }
-    single<GifRepository> { GifRepositoryImpl(get(), get()) }
+    single<GifRepository> { GifRepositoryImpl(get(), get(), get(), get()) }
 
 //        single<PagingSourceGif> { PagingSourceTest(get()) }
 //        single<GifRepository> {GifRepositoryTest(get(),get())  }
@@ -94,6 +96,14 @@ val appModule = module {
     viewModel<GifListViewModel> { GifListViewModelImpl(get()) }
 
     viewModel<GifDetailViewModel> { GifDetailViewModelImpl(get(), get()) }
+
+    factory<LoadGifUseCase> { LoadGifUseCaseImpl(get(), get()) }
+
+    factory<GifDataSource> { GifDataSourceImpl(get()) }
+
+    factory<RemoveGifUseCase> { RemoveGifUseCaseImpl(get()) }
+
+    factory<LikeGifUseCase> { LikeGifUseCaseImpl(get()) }
 
 
 }

@@ -29,9 +29,9 @@ class ClearDbWork(private val appContext: Context, workerParameters: WorkerParam
     override fun doWork(): Result {
        // (appContext as App).component.inject(this)
 
-        val allGif = database.getAllGifData()
+        //val allGif = database.getAllGifData()
         Log.i("ClearDbWork", "Work start")
-        allGif.let { database.deleteAllGif(it) }
+        //allGif.let { database.deleteAllGif(it) }
 
         notification.showNotification(
             "Clear database",

@@ -11,8 +11,6 @@ import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabaseDao
 
 
-//class PagingSourceGif @Inject constructor(
-
 interface PagingSourceGif {
 
     var searchData: String
@@ -41,17 +39,15 @@ class PagingSourceGifImpl(
         if ((params.key == null) && (offsetData == 0)) offsetData = 0
         else if (params.key != null) offsetData = params.key!!
 
-        var list: List<GifData>
+        val list: List<GifData> = try {
 
-        try {
-
-            list = if (likeGif) getLikeGif(limitTemp)
+            if (likeGif) getLikeGif(limitTemp)
             else getAllGif(limitTemp)
 
         } catch (t: Throwable) {
             Log.e("PagingSource", "error")
             if (t.message != null) Log.e("PagingSource", t.message!!)
-            list = loadGifFromDatabase(limitTemp)
+            loadGifFromDatabase(limitTemp)
             //return LoadResult.Error(t)
         }
 
@@ -72,15 +68,15 @@ class PagingSourceGifImpl(
         return null
     }
 
+
     private suspend fun getAllGif(limit: Int): List<GifData> {
-        val limitTemp = limit
         var listSize = 0
         var listResultTemp = GifParams(listOf())
-        while (listSize < limitTemp) {
+        while (listSize < limit) {
             val getProperties = api.getGifListAsync(
                 apiKey,
                 searchData,
-                limitTemp,
+                limit,
                 offsetData,
                 "g",
                 "en"
@@ -88,7 +84,6 @@ class PagingSourceGifImpl(
             val listResult = getProperties.await()
             if (listSize == 0) listResultTemp = listResult
             else listResultTemp.data = listResultTemp.data.plus(listResult.data)
-
 
             actualData?.let { listResultTemp = removeGif(listResultTemp, it) }
             listSize = listResultTemp.data.size
