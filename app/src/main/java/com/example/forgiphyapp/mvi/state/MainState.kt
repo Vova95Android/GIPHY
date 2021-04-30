@@ -7,5 +7,5 @@ open class MainState {
     object Idle : MainState()
     object Loading : MainState()
     object GifsLoad : MainState()
-    data class Error(val error: String?) : MainState()
+    object Error : MainState()
 }

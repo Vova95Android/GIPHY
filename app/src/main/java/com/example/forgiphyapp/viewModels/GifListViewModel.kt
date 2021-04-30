@@ -47,6 +47,7 @@ class GifListViewModelImpl(private val repository: GifRepository) :
         get() = repository.dataPagingLiveData
 
     private var searchData = "A"
+    private var likeGif = false
 
     override val savedGifLiveData: LiveData<List<GifData>>
         get() = repository.savedGifLiveData
@@ -99,13 +100,13 @@ class GifListViewModelImpl(private val repository: GifRepository) :
         job = viewModelScope.launch {
             fetchGif()
         }
-
     }
 
     override fun getLikeGif() {
         job?.cancel()
         job = viewModelScope.launch {
-            repository.getGif("", viewModelScope, true)
+            likeGif = !likeGif
+            repository.getGif(searchData, viewModelScope, likeGif)
         }
     }
 
@@ -114,7 +115,7 @@ class GifListViewModelImpl(private val repository: GifRepository) :
         try {
             repository.getGif(searchData, viewModelScope, false)
         } catch (e: Exception) {
-            state.value = MainState.Error(e.message)
+            state.value = MainState.Error
         }
     }
 

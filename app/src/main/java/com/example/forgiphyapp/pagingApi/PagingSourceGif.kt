@@ -9,7 +9,6 @@ import com.example.forgiphyapp.api.GiphyService
 import com.example.forgiphyapp.database.DataTransform
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabaseDao
-import javax.inject.Inject
 
 
 //class PagingSourceGif @Inject constructor(
@@ -34,49 +33,26 @@ class PagingSourceGifImpl(
     override var likeGif = false
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, GifData> {
+
         Log.i("PagingSource", "load size - " + params.loadSize)
         Log.i("PagingSource", "key - " + params.key)
-        var limitTemp = params.loadSize
+
+        val limitTemp = params.loadSize
         if ((params.key == null) && (offsetData == 0)) offsetData = 0
         else if (params.key != null) offsetData = params.key!!
-        var listSize = 0
-        var listResultTemp = GifParams(listOf())
-        if (!likeGif) while (listSize < limitTemp) {
-            val getProperties = api.getGifListAsync(
-                apiKey,
-                searchData,
-                limitTemp,
-                offsetData,
-                "g",
-                "en"
-            )
-            try {
 
-                val listResult = getProperties.await()
-                if (listSize == 0) listResultTemp = listResult
-                else listResultTemp.data = listResultTemp.data.plus(listResult.data)
+        var list: List<GifData>
 
-            } catch (t: Throwable) {
-                Log.e("PagingSource", "error")
-                if (t.message != null) Log.e("PagingSource", t.message!!)
-                return LoadResult.Error(t)
-            }
-            actualData?.let { listResultTemp = removeGif(listResultTemp, it) }
-            listSize = listResultTemp.data.size
-            limitTemp -= listSize
-        }
-        var list = listOf<GifData>()
-        if (likeGif) {
-            var count = 0
-            actualData!!.forEach {
-                if (it.like) {
-                    if ((count >= offsetData) && (count < offsetData + limitTemp)) list =
-                        list.plus(it)
-                    count++
-                }
-            }
-        } else {
-            list = setGifToDatabase(listResultTemp)
+        try {
+
+            list = if (likeGif) getLikeGif(limitTemp)
+            else getAllGif(limitTemp)
+
+        } catch (t: Throwable) {
+            Log.e("PagingSource", "error")
+            if (t.message != null) Log.e("PagingSource", t.message!!)
+            list = loadGifFromDatabase(limitTemp)
+            //return LoadResult.Error(t)
         }
 
         var offsetTemp: Int? = null
@@ -94,6 +70,61 @@ class PagingSourceGifImpl(
 
     override fun getRefreshKey(state: PagingState<Int, GifData>): Int? {
         return null
+    }
+
+    private suspend fun getAllGif(limit: Int): List<GifData> {
+        val limitTemp = limit
+        var listSize = 0
+        var listResultTemp = GifParams(listOf())
+        while (listSize < limitTemp) {
+            val getProperties = api.getGifListAsync(
+                apiKey,
+                searchData,
+                limitTemp,
+                offsetData,
+                "g",
+                "en"
+            )
+            val listResult = getProperties.await()
+            if (listSize == 0) listResultTemp = listResult
+            else listResultTemp.data = listResultTemp.data.plus(listResult.data)
+
+
+            actualData?.let { listResultTemp = removeGif(listResultTemp, it) }
+            listSize = listResultTemp.data.size
+        }
+        return setGifToDatabase(listResultTemp)
+
+    }
+
+    private fun getLikeGif(limit: Int): List<GifData> {
+        var list = listOf<GifData>()
+        var count = 0
+        actualData!!.forEach {
+            if (it.like) {
+                if ((count >= offsetData) && (count < offsetData + limit)) list =
+                    list.plus(it)
+                count++
+            }
+        }
+        return list
+    }
+
+    private fun loadGifFromDatabase(limit: Int): List<GifData> {
+        var list = listOf(GifData("error", "error", "error", true, false))
+        var count = 0
+
+        actualData?.let {
+            if (it.size > offsetData)
+                it.forEach { data ->
+                    if (count > offsetData) {
+                        list = list.plus(data)
+                    }
+                    if (count < offsetData + limit) count++
+                    else return@let
+                }
+        }
+        return list
     }
 
     private fun removeGif(listResultTemp: GifParams, actualData: List<GifData>): GifParams {
@@ -116,11 +147,11 @@ class PagingSourceGifImpl(
             val temp = actualData?.firstOrNull {
                 dataTemp.id == it.id
             }
-            if (temp == null) {
-                database.insert(DataTransform.getGifData(dataTemp, true, false))
-                list = list.plus(DataTransform.getGifData(dataTemp, true, false))
+            list = if (temp == null) {
+                database.insert(DataTransform.getGifData(dataTemp))
+                list.plus(DataTransform.getGifData(dataTemp))
             } else {
-                list = list.plus(temp)
+                list.plus(temp)
             }
         }
         return list

@@ -41,7 +41,11 @@ class GifListFragment : Fragment() {
                                 it.like
                             )
                     )
-        })
+        },
+            GifListPagingAdapter.OnErrorListener {
+                if (it) viewModel.state.value = MainState.Error
+                else viewModel.state.value = MainState.GifsLoad
+            })
     }
 
     private val viewModel: GifListViewModel by viewModel()
@@ -118,8 +122,7 @@ class GifListFragment : Fragment() {
                     viewModel!!.state.value = MainState.GifsLoad
                 }
                 if (loadState.refresh is LoadState.Error) {
-                    viewModel!!.state.value =
-                        MainState.Error((loadState.refresh as LoadState.Error).error.message)
+                    viewModel!!.state.value = MainState.Error
                 }
             }
         }
@@ -148,10 +151,9 @@ class GifListFragment : Fragment() {
                         }
                         is MainState.Error -> {
                             binding!!.progressBar.visibility = View.GONE
-                            binding!!.imageList.visibility = View.GONE
+                            binding!!.imageList.visibility = View.VISIBLE
                             binding!!.buttonError.visibility = View.VISIBLE
                             binding!!.textError.visibility = View.VISIBLE
-                            binding!!.textError.text = state.error
                         }
                     }
                 }
