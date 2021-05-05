@@ -52,14 +52,7 @@ class GifListFragment : Fragment() {
     ): View {
         binding = FragmentGifListBinding.inflate(inflater)
 
-
         WorkManager.getInstance(this.requireActivity()).enqueue(uploadWorkerRequest)
-
-        viewModel.savedGifLiveData.observe(viewLifecycleOwner, {
-            viewModel.state.value.newData = it
-            Log.i("GifListFragment", it.size.toString())
-            viewModel.newDataOrRefresh()
-        })
 
         binding!!.imageList.adapter = adapter
 
@@ -68,13 +61,6 @@ class GifListFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        viewModel.linearOrGridLiveData.observe(viewLifecycleOwner, {
-            if (it) {
-                binding!!.imageList.layoutManager = GridLayoutManager(activity, 3)
-            } else {
-                binding!!.imageList.layoutManager = LinearLayoutManager(activity)
-            }
-        })
 
         binding!!.refreshLayout.setOnRefreshListener {
             viewModel.refresh()
@@ -94,9 +80,9 @@ class GifListFragment : Fragment() {
 
         binding!!.buttonError.setOnClickListener { viewModel.refresh() }
 
-        binding!!.linearButton.setOnClickListener { viewModel.linearOrGrid(false) }
+        binding!!.linearButton.setOnClickListener { viewModel.linearOrGrid(true) }
 
-        binding!!.gridButton.setOnClickListener { viewModel.linearOrGrid(true) }
+        binding!!.gridButton.setOnClickListener { viewModel.linearOrGrid(false) }
 
         binding!!.nextPageButton.setOnClickListener { viewModel.nextPage() }
 
@@ -133,11 +119,24 @@ class GifListFragment : Fragment() {
                         adapter.submitList(state.error.minus(state.error[0]))
                     }
                     binding!!.previousPageButton.isEnabled = state.previousActiveButton
+
+                    if (state.linearOrGrid) {
+                        binding!!.imageList.layoutManager = LinearLayoutManager(activity)
+                    } else {
+                        binding!!.imageList.layoutManager = GridLayoutManager(activity, 3)
+                    }
+
                 }
             } catch (e: Exception) {
                 e.message?.let { Log.i("GifListFragment", it) }
             }
         }
+
+        viewModel.state.value.savedGifLiveData.observe(viewLifecycleOwner, {
+            viewModel.newDataFromDatabase(it)
+            Log.i("GifListFragment", it.size.toString())
+            viewModel.newDataOrRefresh(viewModel.state.value.search)
+        })
     }
 
 
