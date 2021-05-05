@@ -1,11 +1,9 @@
 package com.example.forgiphyapp.viewModels
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.mvi.state.MainState
 import com.example.forgiphyapp.repository.GifRepository
@@ -53,6 +51,8 @@ class GifListViewModelImpl(private val repository: GifRepository) :
 
     private var searchData = "H"
     private var likeGif = false
+    private var errorOffset = 0
+    private val limit = 30
 
     override val savedGifLiveData: LiveData<List<GifData>>
         get() = repository.savedGifLiveData
@@ -103,25 +103,23 @@ class GifListViewModelImpl(private val repository: GifRepository) :
 
     private fun handleAction(
         nextPage: Boolean? = null,
-        likeGif: Boolean = false,
         needLoad: Boolean = true
     ) {
         job?.cancel()
         state.value = MainState(isLoading = needLoad)
         job = viewModelScope.launch {
-            try {
-                state.value = MainState(data = repository.getGif(searchData, likeGif, nextPage))
-                previousActiveButton.value = repository.previousButtonIsActive()
-                delay(500)
-            } catch (e: Exception) {
-                state.value = MainState(error = e.message)
-            }
+            val list = repository.getGif(searchData, likeGif, nextPage)
+            if (list[0].id != "ERROR") state.value = MainState(data = list)
+            else state.value = MainState(error = list)
+            previousActiveButton.value = repository.previousButtonIsActive()
+            delay(500)
         }
     }
 
     override fun getLikeGif() {
         likeGif = !likeGif
-        handleAction(likeGif = likeGif)
+        repository.resetPos()
+        handleAction()
     }
 
     override fun nextPage() {

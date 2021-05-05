@@ -8,6 +8,7 @@ import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabaseDao
 import com.example.forgiphyapp.useCases.LikeGifUseCase
 import com.example.forgiphyapp.useCases.LoadGifUseCase
+import com.example.forgiphyapp.useCases.OfflineGifUseCase
 import com.example.forgiphyapp.useCases.RemoveGifUseCase
 
 
@@ -18,7 +19,13 @@ interface GifRepository {
 
     val dataPagingLiveData: MutableLiveData<PagingData<GifData>>
 
-    suspend fun getGif(search: String, likeGif: Boolean, nextPage: Boolean? = null): List<GifData>
+    suspend fun getGif(
+        search: String = "H",
+        likeGif: Boolean = false,
+        nextPage: Boolean? = null
+    ): List<GifData>
+
+    fun resetPos()
 
     fun previousButtonIsActive(): Boolean
 
@@ -30,7 +37,8 @@ class GifRepositoryImpl(
     dataBase: GifDatabaseDao,
     private val loadGifUseCase: LoadGifUseCase,
     private val removeGifUseCase: RemoveGifUseCase,
-    private val likeGifUseCase: LikeGifUseCase
+    private val likeGifUseCase: LikeGifUseCase,
+    private val offlineGifUseCase: OfflineGifUseCase
 ) : GifRepository {
 
     override val savedGifLiveData = dataBase.getAllGifDataLiveData()
@@ -40,16 +48,20 @@ class GifRepositoryImpl(
     override val dataPagingLiveData = MutableLiveData<PagingData<GifData>>()
 
     private var offsetData = 0
-    private var limit = 30
+    private val limit = 30
     private var startPage = 0
+    private var endPage = 0
+    private var searchData = "H"
 
     override fun previousButtonIsActive(): Boolean {
         return startPage >= limit
     }
 
-    private var endPage = 0
-    private var searchData = "A"
-
+    override fun resetPos() {
+        offsetData = 0
+        startPage = 0
+        endPage = 0
+    }
 
     override suspend fun getGif(
         search: String,
@@ -68,11 +80,11 @@ class GifRepositoryImpl(
 
         when (nextPage) {
             true -> {
-                startPage = endPage+1
+                startPage = endPage + 1
                 offsetData = startPage
             }
             false -> {
-                endPage = startPage-1
+                endPage = startPage - 1
                 offsetData = endPage - limit
             }
             null -> {
@@ -83,9 +95,21 @@ class GifRepositoryImpl(
         var listSize = 0
         var listResult = listOf<GifData>()
         while (listSize < limit) {
-            val listResultTemp =
-                if (!likeGif) loadGifUseCase.getGif(searchData, limitTemp, offsetData)
-                else likeGifUseCase.getListLikeGif(offsetData, limitTemp)
+            val listResultTemp: List<GifData> = try {
+                if (likeGif) likeGifUseCase.getListLikeGif(limitTemp, offsetData)
+                else loadGifUseCase.getGif(searchData, limitTemp, offsetData)
+            } catch (e: Exception) {
+                listOf(
+                    GifData(
+                        "ERROR",
+                        e.message,
+                        e.message,
+                        false,
+                        false
+                    )
+                ).plus(offlineGifUseCase.getGif(limitTemp, offsetData))
+            }
+
             if ((nextPage == true) || (nextPage == null)) {
                 listResult = listResult.plus(listResultTemp)
                 listSize = listResult.size

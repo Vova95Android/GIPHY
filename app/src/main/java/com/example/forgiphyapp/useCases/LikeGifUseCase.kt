@@ -5,7 +5,7 @@ import com.example.forgiphyapp.database.GifDatabaseDao
 
 interface LikeGifUseCase {
     suspend fun likeGif(gif: GifData)
-    suspend fun getListLikeGif(offsetData: Int, limit: Int): List<GifData>
+    suspend fun getListLikeGif(limit: Int, offsetData: Int): List<GifData>
 }
 
 class LikeGifUseCaseImpl(val database: GifDatabaseDao) : LikeGifUseCase {
@@ -14,7 +14,7 @@ class LikeGifUseCaseImpl(val database: GifDatabaseDao) : LikeGifUseCase {
         database.update(gif)
     }
 
-    override suspend fun getListLikeGif(offsetData: Int, limit: Int): List<GifData> {
+    override suspend fun getListLikeGif(limit: Int, offsetData: Int): List<GifData> {
         var list = listOf<GifData>()
         val actualData = database.getAllGifData()
         var count = 0

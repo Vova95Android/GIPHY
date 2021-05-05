@@ -68,7 +68,7 @@ class GifListAdapter(
 
     class DiffCallback : DiffUtil.ItemCallback<GifData>() {
         override fun areItemsTheSame(oldItem: GifData, newItem: GifData): Boolean {
-            return oldItem.id == newItem.id
+            return ((oldItem.id == newItem.id)&&(oldItem.like == newItem.like))
         }
 
         override fun areContentsTheSame(oldItem: GifData, newItem: GifData): Boolean {

@@ -80,7 +80,7 @@ val appModule = module {
     }
 
     factory<PagingSourceGif> { PagingSourceGifImpl(get(), get()) }
-    single<GifRepository> { GifRepositoryImpl(get(), get(), get(), get()) }
+    single<GifRepository> { GifRepositoryImpl(get(), get(), get(), get(), get()) }
 
 //        single<PagingSourceGif> { PagingSourceTest(get()) }
 //        single<GifRepository> {GifRepositoryTest(get(),get())  }
@@ -104,6 +104,8 @@ val appModule = module {
     factory<RemoveGifUseCase> { RemoveGifUseCaseImpl(get()) }
 
     factory<LikeGifUseCase> { LikeGifUseCaseImpl(get()) }
+
+    factory<OfflineGifUseCase> { OfflineGifUseCaseImpl(get()) }
 
 
 }

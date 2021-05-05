@@ -128,7 +128,8 @@ class GifListFragment : Fragment() {
                         binding!!.imageList.visibility = View.VISIBLE
                         binding!!.buttonError.visibility = View.VISIBLE
                         binding!!.textError.visibility = View.VISIBLE
-                        binding!!.textError.text = state.error
+                        binding!!.textError.text = state.error[0].full_url
+                        adapter.submitList(state.error.minus(state.error[0]))
                     }
                 }
             } catch (e: Exception) {
