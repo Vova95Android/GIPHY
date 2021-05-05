@@ -41,7 +41,6 @@ class GifListPagingAdapter(
 
             if ((data.id != "error") && (data.full_url != "error")) {
                 itemView.setOnClickListener { listener.onClick(data) }
-                binding.executePendingBindings()
                 val drawable = if (data.like) AppCompatResources.getDrawable(
                     binding.imageLike.context,
                     R.drawable.ic_like

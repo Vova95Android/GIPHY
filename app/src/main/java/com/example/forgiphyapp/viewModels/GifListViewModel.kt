@@ -19,19 +19,16 @@ abstract class GifListViewModel : ViewModel() {
 
     abstract val savedGifLiveData: LiveData<List<GifData>>
 
-    abstract var previousActiveButton: MutableLiveData<Boolean>
-
     abstract fun searchNewData(data: String)
 
     abstract fun refresh()
 
     abstract fun linearOrGrid(set: Boolean)
 
-    abstract fun newDataOrRefresh()
+    abstract fun newDataOrRefresh(searchData: String = "H")
 
     abstract val state: MutableStateFlow<MainState>
 
-    abstract var newData: List<GifData>
 
     abstract fun getLikeGif()
 
@@ -45,54 +42,43 @@ abstract class GifListViewModel : ViewModel() {
 class GifListViewModelImpl(private val repository: GifRepository) :
     GifListViewModel() {
 
-    override val state = MutableStateFlow(MainState())
+    override val state = MutableStateFlow(MainState(isLoading = true))
 
     override val linearOrGridLiveData = MutableLiveData<Boolean>()
 
-    private var searchData = "H"
-    private var likeGif = false
-    private var errorOffset = 0
-    private val limit = 30
 
     override val savedGifLiveData: LiveData<List<GifData>>
         get() = repository.savedGifLiveData
-
-    override var previousActiveButton = MutableLiveData(false)
-
-    override var newData = listOf<GifData>()
 
     override fun refresh() {
         handleAction()
     }
 
     override fun searchNewData(data: String) {
-        searchData = data
-        newDataOrRefresh()
+        newDataOrRefresh(data)
     }
 
     override fun linearOrGrid(set: Boolean) {
         linearOrGridLiveData.value = set
     }
 
-    private var search = "B"
 
-    override fun newDataOrRefresh() {
+    override fun newDataOrRefresh(searchData: String) {
 
         var needRefresh = false
-        if ((!repository.actualData.isNullOrEmpty()) && (!newData.isNullOrEmpty()) && (searchData == search)) {
+        if ((!repository.actualData.isNullOrEmpty()) && (!state.value.newData.isNullOrEmpty()) && (searchData == state.value.search)) {
             for (dataPos in repository.actualData!!.indices) {
-                if ((newData[dataPos].active != repository.actualData!![dataPos].active) || (newData[dataPos].like != repository.actualData!![dataPos].like))
+                if ((state.value.newData[dataPos].active != repository.actualData!![dataPos].active) || (state.value.newData[dataPos].like != repository.actualData!![dataPos].like))
                     needRefresh = true
             }
-            repository.actualData = newData
         } else {
-            repository.actualData = newData
+            needRefresh = true
+        }
+        repository.actualData = state.value.newData
+        if (needRefresh) {
             handleAction()
         }
-        if (needRefresh) {
-            handleAction(needLoad = false)
-        }
-        search = searchData
+        state.value.search = searchData
     }
 
     init {
@@ -101,23 +87,42 @@ class GifListViewModelImpl(private val repository: GifRepository) :
 
     private var job: Job? = null
 
-    private fun handleAction(
-        nextPage: Boolean? = null,
-        needLoad: Boolean = true
-    ) {
+    private fun handleAction(nextPage: Boolean? = null) {
         job?.cancel()
-        state.value = MainState(isLoading = needLoad)
+
+        var value = MainState(isLoading = true)
+        value.search = state.value.search
+        value.likeGif = state.value.likeGif
+        value.newData = state.value.newData
+        state.value = value
+
         job = viewModelScope.launch {
-            val list = repository.getGif(searchData, likeGif, nextPage)
-            if (list[0].id != "ERROR") state.value = MainState(data = list)
-            else state.value = MainState(error = list)
-            previousActiveButton.value = repository.previousButtonIsActive()
+            val list = repository.getGif(state.value.search, state.value.likeGif, nextPage)
+            if (list[0].id != "ERROR") {
+
+                value = MainState(data = list)
+                value.search = state.value.search
+                value.likeGif = state.value.likeGif
+                value.newData = state.value.newData
+                value.previousActiveButton = repository.previousButtonIsActive()
+                state.value = value
+
+            } else {
+
+                value = MainState(error = list)
+                value.search = state.value.search
+                value.likeGif = state.value.likeGif
+                value.newData = state.value.newData
+                value.previousActiveButton = repository.previousButtonIsActive()
+                state.value = value
+
+            }
             delay(500)
         }
     }
 
     override fun getLikeGif() {
-        likeGif = !likeGif
+        state.value.likeGif = !state.value.likeGif
         repository.resetPos()
         handleAction()
     }

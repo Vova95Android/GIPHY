@@ -7,7 +7,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -15,7 +14,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
-import com.example.forgiphyapp.R
 import com.example.forgiphyapp.adapters.GifListAdapter
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
 import com.example.forgiphyapp.viewModels.GifListViewModel
@@ -52,27 +50,18 @@ class GifListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = DataBindingUtil.inflate(
-            inflater,
-            R.layout.fragment_gif_list,
-            container,
-            false
-        )
+        binding = FragmentGifListBinding.inflate(inflater)
 
 
         WorkManager.getInstance(this.requireActivity()).enqueue(uploadWorkerRequest)
 
         viewModel.savedGifLiveData.observe(viewLifecycleOwner, {
-            viewModel.newData = it
+            viewModel.state.value.newData = it
             Log.i("GifListFragment", it.size.toString())
             viewModel.newDataOrRefresh()
         })
 
-        binding!!.viewModel = viewModel
-
         binding!!.imageList.adapter = adapter
-
-        binding!!.lifecycleOwner = this
 
         return binding!!.root
     }
@@ -103,6 +92,18 @@ class GifListFragment : Fragment() {
             }
         })
 
+        binding!!.buttonError.setOnClickListener { viewModel.refresh() }
+
+        binding!!.linearButton.setOnClickListener { viewModel.linearOrGrid(false) }
+
+        binding!!.gridButton.setOnClickListener { viewModel.linearOrGrid(true) }
+
+        binding!!.nextPageButton.setOnClickListener { viewModel.nextPage() }
+
+        binding!!.previousPageButton.setOnClickListener { viewModel.previousPage() }
+
+        binding!!.likeButton.setOnClickListener { viewModel.getLikeGif() }
+
         observeViewModel()
     }
 
@@ -131,6 +132,7 @@ class GifListFragment : Fragment() {
                         binding!!.textError.text = state.error[0].full_url
                         adapter.submitList(state.error.minus(state.error[0]))
                     }
+                    binding!!.previousPageButton.isEnabled = state.previousActiveButton
                 }
             } catch (e: Exception) {
                 e.message?.let { Log.i("GifListFragment", it) }

@@ -34,7 +34,6 @@ class GifListAdapter(
 
             if ((data.id != "error") && (data.full_url != "error")) {
                 itemView.setOnClickListener { listener.onClick(data) }
-                binding.executePendingBindings()
                 val drawable = if (data.like) AppCompatResources.getDrawable(
                     binding.imageLike.context,
                     R.drawable.ic_like
@@ -68,7 +67,7 @@ class GifListAdapter(
 
     class DiffCallback : DiffUtil.ItemCallback<GifData>() {
         override fun areItemsTheSame(oldItem: GifData, newItem: GifData): Boolean {
-            return ((oldItem.id == newItem.id)&&(oldItem.like == newItem.like))
+            return ((oldItem.id == newItem.id) && (oldItem.like == newItem.like))
         }
 
         override fun areContentsTheSame(oldItem: GifData, newItem: GifData): Boolean {
