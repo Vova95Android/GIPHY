@@ -8,17 +8,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.forgiphyapp.R
-import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.databinding.GifDetailFragmentBinding
 import com.example.forgiphyapp.viewModels.GifDetailViewModel
 import kotlinx.coroutines.flow.collect
-import org.koin.android.ext.android.get
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 

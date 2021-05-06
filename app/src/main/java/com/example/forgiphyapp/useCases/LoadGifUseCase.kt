@@ -9,7 +9,11 @@ import com.example.forgiphyapp.database.GifDatabaseDao
 
 interface LoadGifUseCase {
 
-    suspend fun getGif(searchData: String, limit: Int, offsetData: Int): List<GifData>
+    suspend fun getGif(search: String, nextPage: Boolean?): List<GifData>
+
+    fun previousButtonIsActive(): Boolean
+
+    fun nextButtonIsActive(): Boolean
 }
 
 class LoadGifUseCaseImpl(
@@ -17,8 +21,79 @@ class LoadGifUseCaseImpl(
     private val database: GifDatabaseDao
 ) : LoadGifUseCase {
 
+    private var offsetData = 0
+    private val limit = 30
+    private var startPage = 0
+    private var endPage = 0
+    private var searchData = "H"
+    private var nextButtonActive = true
 
-    override suspend fun getGif(searchData: String, limit: Int, offsetData: Int): List<GifData> {
+    override fun previousButtonIsActive(): Boolean {
+        return startPage >= limit
+    }
+
+    override fun nextButtonIsActive(): Boolean {
+        return nextButtonActive
+    }
+
+
+    override suspend fun getGif(search: String, nextPage: Boolean?): List<GifData> {
+        var limitTemp = limit
+        nextButtonActive = true
+
+        if (search != searchData) {
+            offsetData = 0
+            startPage = 0
+            endPage = 0
+        }
+        searchData = search
+
+        when (nextPage) {
+            true -> {
+                startPage = endPage + 1
+                offsetData = startPage
+            }
+            false -> {
+                endPage = startPage - 1
+                offsetData = endPage - limit
+            }
+            null -> {
+                offsetData = startPage
+            }
+        }
+
+        var listSize = 0
+        var listResult = listOf<GifData>()
+        while (listSize < limit) {
+            val listSizeOld = listSize
+            val listResultTemp: List<GifData> = loadGifFromSource(searchData, limitTemp, offsetData)
+
+            if ((nextPage == true) || (nextPage == null)) {
+                listResult = listResult.plus(listResultTemp)
+                listSize = listResult.size
+                offsetData += limitTemp
+                limitTemp = limit - listSize
+            } else if (nextPage == false) {
+                listResult = listResultTemp.plus(listResult)
+                listSize = listResult.size
+                limitTemp = limit - listSize
+                offsetData -= limitTemp
+            }
+            if (offsetData < 0) {
+                listSize = limit
+                offsetData = 0
+            }
+            if (listSizeOld == listSize) {
+                listSize = limit
+                nextButtonActive = false
+            }
+        }
+        if ((nextPage == true) || (nextPage == null)) endPage = offsetData
+        else startPage = offsetData + limitTemp
+        return listResult
+    }
+
+    private suspend fun loadGifFromSource(searchData: String, limit: Int, offsetData: Int): List<GifData> {
         var listTemp = dataSource.getGif(searchData, limit, offsetData)
         val actualData = database.getAllGifData()
         listTemp = removeGif(listTemp, actualData)

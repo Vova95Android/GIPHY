@@ -1,19 +1,22 @@
 package com.example.forgiphyapp.viewModels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.mvi.state.ErrorState
 import com.example.forgiphyapp.mvi.state.GifListState
-import com.example.forgiphyapp.repository.GifRepository
-import com.example.forgiphyapp.repository.LikeGif
-import com.example.forgiphyapp.repository.RemoveGif
+import com.example.forgiphyapp.useCases.LikeGif
+import com.example.forgiphyapp.useCases.RemoveGif
+import com.example.forgiphyapp.useCases.LikeGifUseCase
+import com.example.forgiphyapp.useCases.LoadGifUseCase
+import com.example.forgiphyapp.useCases.OfflineGifUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 
 abstract class GifListViewModel : ViewModel() {
@@ -38,7 +41,9 @@ abstract class GifListViewModel : ViewModel() {
 }
 
 class GifListViewModelImpl(
-    private val repository: GifRepository,
+    private val likeGifUseCase: LikeGifUseCase,
+    private val loadGifUseCase: LoadGifUseCase,
+    private val offlineGifUseCase: OfflineGifUseCase,
     private val likeGifId: LikeGif,
     private val removeGifId: RemoveGif
 ) :
@@ -63,35 +68,35 @@ class GifListViewModelImpl(
     }
 
     private var job: Job? = null
-    private var jobLike: Job
-    private var jobRemove: Job
-
-    init {
-        jobLike = viewModelScope.launch {
-            likeGifId.data.collect { data ->
-                if (state.value.data.isNotEmpty()) {
-                    val temp = state.value.data.map { gif ->
-                        if (gif.id != data.id) {
-                            gif
-                        } else {
-                            data
-                        }
+    private var jobLike: Job = viewModelScope.launch {
+        likeGifId.data.collect { data ->
+            if (state.value.data.isNotEmpty()) {
+                val temp = state.value.data.map { gif ->
+                    if (gif.id != data.id) {
+                        gif
+                    } else {
+                        data
                     }
-                    state.value = state.value.copy(data = temp)
-                } else if (state.value.error.errorMessage.isNotEmpty()) {
-                    state.value = state.value.copy(isLoading = true)
-                    val temp = state.value.error.offlineData.map { gif ->
-                        if (gif.id != data.id) gif
-                        else data
-                    }
-                    state.value = state.value.copy(
-                        isLoading = false,
-                        data = emptyList(),
-                        error = ErrorState(state.value.error.errorMessage, temp)
-                    )
                 }
+                state.value = state.value.copy(data = temp)
+            } else if (state.value.error.errorMessage.isNotEmpty()) {
+                state.value = state.value.copy(isLoading = true)
+                val temp = state.value.error.offlineData.map { gif ->
+                    if (gif.id != data.id) gif
+                    else data
+                }
+                state.value = state.value.copy(
+                    isLoading = false,
+                    data = emptyList(),
+                    error = ErrorState(state.value.error.errorMessage, temp)
+                )
             }
         }
+    }
+    private var jobRemove: Job
+    private var mutex = Mutex()
+
+    init {
         jobRemove = viewModelScope.launch {
             removeGifId.data.collect {
                 handleAction(needLoader = false)
@@ -101,38 +106,48 @@ class GifListViewModelImpl(
         handleAction()
     }
 
-
     private fun handleAction(nextPage: Boolean? = null, needLoader: Boolean = true) {
-        job?.cancel()
+
+        if (!mutex.isLocked) {
         if (needLoader) state.value = state.value.copy(isLoading = true, data = listOf())
-        job = viewModelScope.launch {
-            val list = repository.getGif(state.value.search, state.value.likeGif, nextPage)
-            if (list.isNotEmpty())
-                if (list[0].id != "ERROR") {
-
-                    state.value = state.value.copy(
-                        isLoading = false,
-                        data = list,
-                        previousActiveButton = repository.previousButtonIsActive(),
-                        nextActiveButton = repository.nextButtonIsActive()
-                    )
-
-                } else {
-                    state.value = state.value.copy(
-                        isLoading = false,
-                        data = listOf(),
-                        error = ErrorState(errorMessage = list[0].full_url!!, list.minus(list[0])),
-                        previousActiveButton = repository.previousButtonIsActive(),
-                        nextActiveButton = repository.nextButtonIsActive()
-                    )
-
+            job?.cancel()
+            job = viewModelScope.launch {
+                mutex.withLock {
+                    try {
+                        if (state.value.likeGif) state.value = state.value.copy(
+                            isLoading = false,
+                            data = likeGifUseCase.getGif(nextPage),
+                            error = ErrorState(),
+                            previousActiveButton = likeGifUseCase.previousButtonIsActive(),
+                            nextActiveButton = likeGifUseCase.nextButtonIsActive()
+                        )
+                        else {
+                            state.value = state.value.copy(
+                                isLoading = false,
+                                data = loadGifUseCase.getGif(
+                                    state.value
+                                        .search, nextPage
+                                ),
+                                error = ErrorState(),
+                                previousActiveButton = loadGifUseCase.previousButtonIsActive(),
+                                nextActiveButton = loadGifUseCase.nextButtonIsActive()
+                            )
+                        }
+                    } catch (e: Exception) {
+                        state.value=state.value.copy(
+                            isLoading = false,
+                            data = emptyList(),
+                            error = ErrorState(e.message!!, offlineGifUseCase.getGif(nextPage))
+                        )
+                    }
                 }
+            }
         }
     }
 
+
     override fun getLikeGif() {
         state.value = state.value.copy(likeGif = !state.value.likeGif)
-        repository.resetPos()
         handleAction()
     }
 
@@ -145,7 +160,7 @@ class GifListViewModelImpl(
     }
 
     override suspend fun likeGif(data: GifData) {
-        repository.likeGif(data.copy(like = !data.like))
+        likeGifUseCase.likeGif(data.copy(like = !data.like))
         likeGifId.data.emit(data.copy(like = !data.like))
     }
 
@@ -154,25 +169,6 @@ class GifListViewModelImpl(
         job?.cancel()
         jobLike.cancel()
         jobRemove.cancel()
-    }
-
-    private fun newState(
-        isLoading: Boolean = state.value.isLoading,
-        data: List<GifData> = state.value.data,
-        error: ErrorState = state.value.error,
-        likeGif: Boolean = state.value.likeGif,
-        search: String = state.value.search,
-        linearOrGrid: Boolean = state.value.linearOrGrid
-    ): GifListState {
-        return GifListState(
-            isLoading,
-            data,
-            error,
-            likeGif,
-            search,
-            repository.previousButtonIsActive(),
-            linearOrGrid
-        )
     }
 
 }

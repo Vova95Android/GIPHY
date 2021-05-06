@@ -1,28 +1,23 @@
 package com.example.forgiphyapp.viewModels
 
-import android.util.Log
 import android.widget.ImageView
 import androidx.core.net.toUri
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.forgiphyapp.R
 import com.example.forgiphyapp.database.GifData
-import com.example.forgiphyapp.database.GifDatabaseDao
 import com.example.forgiphyapp.mvi.state.GifDetailState
-import com.example.forgiphyapp.mvi.state.GifListState
-import com.example.forgiphyapp.repository.GifRepository
-import com.example.forgiphyapp.repository.LikeGif
-import com.example.forgiphyapp.repository.RemoveGif
+import com.example.forgiphyapp.useCases.LikeGif
+import com.example.forgiphyapp.useCases.RemoveGif
+import com.example.forgiphyapp.useCases.LikeGifUseCase
+import com.example.forgiphyapp.useCases.RemoveGifUseCase
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.lang.Exception
 
 abstract class GifDetailViewModel : ViewModel() {
     abstract val state: StateFlow<GifDetailState>
@@ -32,7 +27,8 @@ abstract class GifDetailViewModel : ViewModel() {
 }
 
 class GifDetailViewModelImpl(
-    private val repository: GifRepository,
+    private val removeGifUseCase: RemoveGifUseCase,
+    private val likeGifUseCase: LikeGifUseCase,
     data: GifData,
     private val likeGifId: LikeGif,
     private val removeGifId: RemoveGif
@@ -40,11 +36,10 @@ class GifDetailViewModelImpl(
 
     override val state = MutableStateFlow(GifDetailState(data))
 
-
     override fun removeGif() {
         viewModelScope.launch {
             val data = state.value.gifData.copy(active = false)
-            repository.removeGif(data)
+            removeGifUseCase.removeGif(data)
             removeGifId.data.emit(state.value.gifData)
             state.value = state.value.copy(gifData = data)
             cancel()
@@ -56,13 +51,12 @@ class GifDetailViewModelImpl(
             try {
                 delay(500)
                 val data = state.value.gifData.copy(like = !state.value.gifData.like)
-                repository.likeGif(data)
+                likeGifUseCase.likeGif(data)
                 likeGifId.data.emit(data)
                 state.value = state.value.copy(gifData = data)
             } catch (e: Exception) {
                 e.message?.let { state.value = state.value.copy(errorGif = e.message!!) }
             }
-
             cancel()
         }
     }

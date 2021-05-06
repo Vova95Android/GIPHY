@@ -1,6 +1,5 @@
 package com.example.forgiphyapp.koin
 
-import android.content.Context
 import androidx.room.Room
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkRequest
@@ -12,14 +11,9 @@ import com.example.forgiphyapp.database.GifDatabase
 import com.example.forgiphyapp.database.GifDatabaseDao
 import com.example.forgiphyapp.pagingApi.PagingSourceGif
 import com.example.forgiphyapp.pagingApi.PagingSourceGifImpl
-import com.example.forgiphyapp.repository.GifRepository
-import com.example.forgiphyapp.repository.GifRepositoryImpl
-import com.example.forgiphyapp.repository.LikeGif
-import com.example.forgiphyapp.repository.RemoveGif
-import com.example.forgiphyapp.test.PagingSourceTest
+import com.example.forgiphyapp.useCases.LikeGif
+import com.example.forgiphyapp.useCases.RemoveGif
 import com.example.forgiphyapp.useCases.*
-import com.example.forgiphyapp.vievModelsFactory.GifDetailViewModelFactory
-import com.example.forgiphyapp.vievModelsFactory.GifListViewModelFactory
 import com.example.forgiphyapp.viewModels.GifDetailViewModel
 import com.example.forgiphyapp.viewModels.GifDetailViewModelImpl
 import com.example.forgiphyapp.viewModels.GifListViewModel
@@ -80,23 +74,18 @@ val appModule = module {
     }
 
     factory<PagingSourceGif> { PagingSourceGifImpl(get(), get()) }
-    single<GifRepository> { GifRepositoryImpl(get(), get(), get(), get(), get()) }
 
 //        single<PagingSourceGif> { PagingSourceTest(get()) }
 //        single<GifRepository> {GifRepositoryTest(get(),get())  }
 //        single <GifDatabaseDao> { DatabaseTest() }
 
-    factory { GifListViewModelFactory(get()) }
-
-    factory { GifDetailViewModelFactory(get()) }
-
 
     factory { Notification(androidContext()) }
 
-    viewModel<GifListViewModel> { GifListViewModelImpl(get(), get(), get()) }
+    viewModel<GifListViewModel> { GifListViewModelImpl(get(), get(), get(), get(), get()) }
 
     viewModel<GifDetailViewModel> { (gifData: GifData) ->
-        GifDetailViewModelImpl(get(), gifData, get(), get())
+        GifDetailViewModelImpl(get(), get(), gifData, get(), get())
     }
 
     factory<LoadGifUseCase> { LoadGifUseCaseImpl(get(), get()) }

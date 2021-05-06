@@ -1,4 +1,4 @@
-package com.example.forgiphyapp.repository
+package com.example.forgiphyapp.useCases
 
 import com.example.forgiphyapp.database.GifData
 import kotlinx.coroutines.flow.MutableSharedFlow
