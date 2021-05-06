@@ -29,6 +29,8 @@ interface GifRepository {
 
     fun previousButtonIsActive(): Boolean
 
+    fun nextButtonIsActive(): Boolean
+
     suspend fun removeGif(gif: GifData)
     suspend fun likeGif(gif: GifData)
 }
@@ -52,9 +54,14 @@ class GifRepositoryImpl(
     private var startPage = 0
     private var endPage = 0
     private var searchData = "H"
+    private var nextButtonActive=true
 
     override fun previousButtonIsActive(): Boolean {
         return startPage >= limit
+    }
+
+    override fun nextButtonIsActive(): Boolean {
+        return nextButtonActive
     }
 
     override fun resetPos() {
@@ -71,6 +78,7 @@ class GifRepositoryImpl(
 
 
         var limitTemp = limit
+        nextButtonActive=true
 
         if (search != searchData) {
             offsetData = 0
@@ -127,7 +135,10 @@ class GifRepositoryImpl(
                 listSize = limit
                 offsetData = 0
             }
-            if (listSizeOld == listSize) listSize = limit
+            if (listSizeOld == listSize) {
+                listSize = limit
+                nextButtonActive=false
+            }
         }
         if ((nextPage == true) || (nextPage == null)) endPage = offsetData
         else startPage = offsetData + limitTemp

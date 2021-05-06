@@ -53,13 +53,13 @@ class GifListViewModelImpl(
 
     override fun searchNewData(data: String) {
         if (data != state.value.search) {
-            state.value = newState(search = data)
+            state.value = state.value.copy(search = data)
             handleAction()
         }
     }
 
     override fun linearOrGrid(set: Boolean) {
-        state.value = newState(linearOrGrid = set)
+        state.value = state.value.copy(linearOrGrid = set)
     }
 
     private var job: Job? = null
@@ -79,12 +79,12 @@ class GifListViewModelImpl(
                     }
                     state.value = state.value.copy(data = temp)
                 } else if (state.value.error.errorMessage.isNotEmpty()) {
-                    state.value = newState(isLoading = true)
+                    state.value = state.value.copy(isLoading = true)
                     val temp = state.value.error.offlineData.map { gif ->
                         if (gif.id != data.id) gif
                         else data
                     }
-                    state.value = newState(
+                    state.value = state.value.copy(
                         isLoading = false,
                         data = emptyList(),
                         error = ErrorState(state.value.error.errorMessage, temp)
@@ -105,19 +105,26 @@ class GifListViewModelImpl(
 
     private fun handleAction(nextPage: Boolean? = null, needLoader: Boolean = true) {
         job?.cancel()
-        if (needLoader) state.value = newState(isLoading = true, data = listOf())
+        if (needLoader) state.value = state.value.copy(isLoading = true, data = listOf())
         job = viewModelScope.launch {
             val list = repository.getGif(state.value.search, state.value.likeGif, nextPage)
             if (list.isNotEmpty())
                 if (list[0].id != "ERROR") {
 
-                    state.value = newState(isLoading = false, data = list)
+                    state.value = state.value.copy(
+                        isLoading = false,
+                        data = list,
+                        previousActiveButton = repository.previousButtonIsActive(),
+                        nextActiveButton = repository.nextButtonIsActive()
+                    )
 
                 } else {
-                    state.value = newState(
+                    state.value = state.value.copy(
                         isLoading = false,
                         data = listOf(),
-                        error = ErrorState(errorMessage = list[0].full_url!!, list.minus(list[0]))
+                        error = ErrorState(errorMessage = list[0].full_url!!, list.minus(list[0])),
+                        previousActiveButton = repository.previousButtonIsActive(),
+                        nextActiveButton = repository.nextButtonIsActive()
                     )
 
                 }
@@ -125,7 +132,7 @@ class GifListViewModelImpl(
     }
 
     override fun getLikeGif() {
-        state.value = newState(likeGif = !state.value.likeGif)
+        state.value = state.value.copy(likeGif = !state.value.likeGif)
         repository.resetPos()
         handleAction()
     }

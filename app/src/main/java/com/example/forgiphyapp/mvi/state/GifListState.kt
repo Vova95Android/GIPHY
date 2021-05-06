@@ -9,5 +9,6 @@ data class GifListState(
     val likeGif: Boolean = false,
     val search: String = "B",
     val previousActiveButton: Boolean = false,
+    val nextActiveButton: Boolean = true,
     val linearOrGrid: Boolean = false
 )

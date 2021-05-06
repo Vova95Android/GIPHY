@@ -117,7 +117,9 @@ class GifListFragment : Fragment() {
                         binding!!.textError.text = state.error.errorMessage
                         adapter.submitList(state.error.offlineData)
                     }
+
                     binding!!.previousPageButton.isEnabled = state.previousActiveButton
+                    binding!!.nextPageButton.isEnabled = state.nextActiveButton
 
                     if (state.linearOrGrid) {
                         binding!!.imageList.layoutManager = LinearLayoutManager(activity)
