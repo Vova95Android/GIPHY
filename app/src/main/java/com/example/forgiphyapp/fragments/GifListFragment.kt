@@ -31,15 +31,11 @@ class GifListFragment : Fragment() {
                     .navigate(
                         GifListFragmentDirections
                             .actionGifListFragmentToGifDetailFragment(
-                                it.id,
-                                it.full_url!!,
-                                it.preview_url,
-                                it.like
+                                it
                             )
                     )
         },
             GifListAdapter.OnLikeListener {
-                it.like = !it.like
                 lifecycleScope.launch { viewModel.likeGif(it) }
             })
     }
@@ -113,13 +109,13 @@ class GifListFragment : Fragment() {
                         binding!!.textError.visibility = View.GONE
                         adapter.submitList(state.data)
                     }
-                    if (!state.error.isNullOrEmpty()) {
+                    if (state.error.errorMessage.isNotEmpty()) {
                         binding!!.progressBar.visibility = View.GONE
                         binding!!.imageList.visibility = View.VISIBLE
                         binding!!.buttonError.visibility = View.VISIBLE
                         binding!!.textError.visibility = View.VISIBLE
-                        binding!!.textError.text = state.error[0].full_url
-                        adapter.submitList(state.error.minus(state.error[0]))
+                        binding!!.textError.text = state.error.errorMessage
+                        adapter.submitList(state.error.offlineData)
                     }
                     binding!!.previousPageButton.isEnabled = state.previousActiveButton
 
@@ -134,12 +130,6 @@ class GifListFragment : Fragment() {
                 e.message?.let { Log.i("GifListFragment", it) }
             }
         }
-
-//        viewModel.state.value.savedGifLiveData.observe(viewLifecycleOwner, {
-//            viewModel.newDataFromDatabase(it)
-//            Log.i("GifListFragment", it.size.toString())
-//            viewModel.newDataOrRefresh(viewModel.state.value.search)
-//        })
     }
 
 

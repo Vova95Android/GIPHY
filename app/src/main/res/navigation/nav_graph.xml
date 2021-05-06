@@ -21,18 +21,7 @@
             app:launchSingleTop="false"
             app:popUpToInclusive="true" />
         <argument
-            android:name="Id"
-            app:argType="string" />
-        <argument
-            android:name="Detail_url"
-            app:argType="string" />
-        <argument
-            android:name="Preview_url"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="Like"
-            app:argType="boolean"
-            app:nullable="false" />
+            android:name="gifData"
+            app:argType="com.example.forgiphyapp.database.GifData" />
     </fragment>
 </navigation>

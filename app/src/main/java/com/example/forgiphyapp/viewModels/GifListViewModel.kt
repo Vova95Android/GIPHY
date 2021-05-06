@@ -1,18 +1,15 @@
 package com.example.forgiphyapp.viewModels
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.forgiphyapp.database.GifData
-import com.example.forgiphyapp.mvi.state.MainState
+import com.example.forgiphyapp.mvi.state.ErrorState
+import com.example.forgiphyapp.mvi.state.GifListState
 import com.example.forgiphyapp.repository.GifRepository
 import com.example.forgiphyapp.repository.LikeGif
 import com.example.forgiphyapp.repository.RemoveGif
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -21,15 +18,13 @@ import kotlinx.coroutines.launch
 
 abstract class GifListViewModel : ViewModel() {
 
-    abstract val state: StateFlow<MainState>
+    abstract val state: StateFlow<GifListState>
 
     abstract fun searchNewData(data: String)
 
     abstract fun refresh()
 
     abstract fun linearOrGrid(set: Boolean)
-
-    abstract fun newDataFromDatabase(listData: List<GifData>)
 
     abstract fun getLikeGif()
 
@@ -49,16 +44,8 @@ class GifListViewModelImpl(
 ) :
     GifListViewModel() {
 
-    override val state = MutableStateFlow(
-        MainState(
-            isLoading = true
-        )
-    )
+    override val state = MutableStateFlow(GifListState(isLoading = true))
 
-
-    override fun newDataFromDatabase(listData: List<GifData>) {
-        state.value = newState(newData = listData)
-    }
 
     override fun refresh() {
         handleAction()
@@ -83,29 +70,30 @@ class GifListViewModelImpl(
         jobLike = viewModelScope.launch {
             likeGifId.data.collect { data ->
                 if (state.value.data.isNotEmpty()) {
-                    state.value = newState(isLoading = true)
-                    Log.e("GifListViewModel", "Like detect")
-                    Log.e("GifListViewModel", "id - ${data.id}")
                     val temp = state.value.data.map { gif ->
-                        if (gif.id != data.id) gif
-                        else data
+                        if (gif.id != data.id) {
+                            gif
+                        } else {
+                            data
+                        }
                     }
-                    state.value = newState(isLoading = false, data = temp, error = listOf())
-                    likeGifId.data.value = GifData("", "", "", false, false)
-                } else if (!state.value.error.isNullOrEmpty()) {
+                    state.value = state.value.copy(data = temp)
+                } else if (state.value.error.errorMessage.isNotEmpty()) {
                     state.value = newState(isLoading = true)
-                    val temp = state.value.error!!.map { gif ->
+                    val temp = state.value.error.offlineData.map { gif ->
                         if (gif.id != data.id) gif
                         else data
                     }
-                    state.value = newState(isLoading = false, data = listOf(), error = temp)
-                    likeGifId.data.value = GifData("", "", "", false, false)
+                    state.value = newState(
+                        isLoading = false,
+                        data = emptyList(),
+                        error = ErrorState(state.value.error.errorMessage, temp)
+                    )
                 }
             }
         }
         jobRemove = viewModelScope.launch {
             removeGifId.data.collect {
-                Log.e("GifListViewModel", "Remove detect")
                 handleAction(needLoader = false)
                 removeGifId.data.value = GifData("", "", "", false, false)
             }
@@ -117,17 +105,20 @@ class GifListViewModelImpl(
 
     private fun handleAction(nextPage: Boolean? = null, needLoader: Boolean = true) {
         job?.cancel()
-        if (needLoader) state.value = newState(isLoading = true, data = listOf(), error = listOf())
-
+        if (needLoader) state.value = newState(isLoading = true, data = listOf())
         job = viewModelScope.launch {
             val list = repository.getGif(state.value.search, state.value.likeGif, nextPage)
             if (list.isNotEmpty())
                 if (list[0].id != "ERROR") {
 
-                    state.value = newState(isLoading = false, data = list, error = listOf())
+                    state.value = newState(isLoading = false, data = list)
 
                 } else {
-                    state.value = newState(isLoading = false, data = listOf(), error = list)
+                    state.value = newState(
+                        isLoading = false,
+                        data = listOf(),
+                        error = ErrorState(errorMessage = list[0].full_url!!, list.minus(list[0]))
+                    )
 
                 }
         }
@@ -148,8 +139,8 @@ class GifListViewModelImpl(
     }
 
     override suspend fun likeGif(data: GifData) {
-        repository.likeGif(data)
-        likeGifId.data.value = data
+        repository.likeGif(data.copy(like = !data.like))
+        likeGifId.data.emit(data.copy(like = !data.like))
     }
 
     override fun onCleared() {
@@ -162,19 +153,17 @@ class GifListViewModelImpl(
     private fun newState(
         isLoading: Boolean = state.value.isLoading,
         data: List<GifData> = state.value.data,
-        error: List<GifData>? = state.value.error,
+        error: ErrorState = state.value.error,
         likeGif: Boolean = state.value.likeGif,
         search: String = state.value.search,
-        newData: List<GifData> = state.value.newData,
         linearOrGrid: Boolean = state.value.linearOrGrid
-    ): MainState {
-        return MainState(
+    ): GifListState {
+        return GifListState(
             isLoading,
             data,
             error,
             likeGif,
             search,
-            newData,
             repository.previousButtonIsActive(),
             linearOrGrid
         )

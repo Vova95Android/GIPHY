@@ -1,4 +1,4 @@
-package com.example.forgiphyapp .test
+package com.example.forgiphyapp.test
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

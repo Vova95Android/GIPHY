@@ -11,7 +11,7 @@ import com.example.forgiphyapp.viewModels.GifListViewModelImpl
 import javax.inject.Inject
 
 //class GifListViewModelFactory @Inject constructor(
-class GifListViewModelFactory (
+class GifListViewModelFactory(
     private val repository: GifRepository
 ) : ViewModelProvider.Factory {
 

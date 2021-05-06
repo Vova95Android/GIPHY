@@ -30,12 +30,12 @@ class AppModule {
             var instance = INSTANCE
             if (instance == null) {
                 instance = Room.databaseBuilder(
-                        context.applicationContext,
-                        GifDatabase::class.java,
-                        "gif_database"
+                    context.applicationContext,
+                    GifDatabase::class.java,
+                    "gif_database"
                 )
-                        .fallbackToDestructiveMigration()
-                        .build()
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
             }
             return instance.gifDatabaseDao
@@ -48,25 +48,25 @@ class AppModule {
         val baseUrl = "https://api.giphy.com/v1/gifs/"
 
         val moshi = Moshi.Builder()
-                .add(KotlinJsonAdapterFactory())
-                .build()
+            .add(KotlinJsonAdapterFactory())
+            .build()
 
         val retrofit = Retrofit.Builder()
-                .addConverterFactory(MoshiConverterFactory.create(moshi))
-                .addCallAdapterFactory(CoroutineCallAdapterFactory())
-                .baseUrl(baseUrl)
-                .build()
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .addCallAdapterFactory(CoroutineCallAdapterFactory())
+            .baseUrl(baseUrl)
+            .build()
         return retrofit.create(GiphyService::class.java)
     }
 
     @Provides
-    fun getWorker(): WorkRequest{
-        val constrain=Constraints.Builder()
+    fun getWorker(): WorkRequest {
+        val constrain = Constraints.Builder()
             .setRequiresDeviceIdle(true)
             .build()
 
         return PeriodicWorkRequestBuilder<ClearDbWork>(20, TimeUnit.MINUTES)
-            .setInitialDelay(5,TimeUnit.MINUTES)
+            .setInitialDelay(5, TimeUnit.MINUTES)
             .build()
     }
 }

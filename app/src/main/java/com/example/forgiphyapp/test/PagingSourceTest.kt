@@ -8,7 +8,8 @@ import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabaseDao
 import com.example.forgiphyapp.pagingApi.PagingSourceGif
 
-class PagingSourceTest(private val database: GifDatabaseDao): PagingSource<Int, GifData>(), PagingSourceGif {
+class PagingSourceTest(private val database: GifDatabaseDao) : PagingSource<Int, GifData>(),
+    PagingSourceGif {
 
 
     override fun getRefreshKey(state: PagingState<Int, GifData>): Int? {
@@ -16,9 +17,9 @@ class PagingSourceTest(private val database: GifDatabaseDao): PagingSource<Int, 
     }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, GifData> {
-        val list=actualData
-        var listRemov=list
-        list?.forEach { if(!it.active) listRemov= listRemov?.minus(it) }
+        val list = actualData
+        var listRemov = list
+        list?.forEach { if (!it.active) listRemov = listRemov?.minus(it) }
         return LoadResult.Page(
             data = listRemov!!,
             prevKey = null,
@@ -26,10 +27,10 @@ class PagingSourceTest(private val database: GifDatabaseDao): PagingSource<Int, 
         )
     }
 
-    override var searchData: String="A"
+    override var searchData: String = "A"
 
-    override var actualData: List<GifData>?=null
-    override var likeGif=false
+    override var actualData: List<GifData>? = null
+    override var likeGif = false
 
     override fun clear() {
         TODO("Not yet implemented")

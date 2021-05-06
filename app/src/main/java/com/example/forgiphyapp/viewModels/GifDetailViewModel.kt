@@ -12,20 +12,20 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.forgiphyapp.R
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabaseDao
+import com.example.forgiphyapp.mvi.state.GifDetailState
+import com.example.forgiphyapp.mvi.state.GifListState
 import com.example.forgiphyapp.repository.GifRepository
 import com.example.forgiphyapp.repository.LikeGif
 import com.example.forgiphyapp.repository.RemoveGif
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.lang.Exception
 
 abstract class GifDetailViewModel : ViewModel() {
-    abstract val urlLiveData: LiveData<String>
-    abstract val removeGifLiveData: LiveData<Boolean>
-    abstract val likeGifLiveData: LiveData<Boolean>
-    abstract val errorLikeGifLiveData: LiveData<String?>
-    abstract var dataTemp: GifData
+    abstract val state: StateFlow<GifDetailState>
     abstract fun removeGif()
     abstract fun setGifToScreen(img: ImageView)
     abstract fun likeGif()
@@ -37,19 +37,16 @@ class GifDetailViewModelImpl(
     private val likeGifId: LikeGif,
     private val removeGifId: RemoveGif
 ) : GifDetailViewModel() {
-    override var dataTemp = data
-    override val urlLiveData = MutableLiveData<String>()
-    override val removeGifLiveData = MutableLiveData<Boolean>()
-    override val likeGifLiveData = MutableLiveData(dataTemp.like)
-    override val errorLikeGifLiveData = MutableLiveData<String?>(null)
+
+    override val state = MutableStateFlow(GifDetailState(data))
 
 
     override fun removeGif() {
         viewModelScope.launch {
-            dataTemp.active = false
-            repository.removeGif(dataTemp)
-            removeGifId.data.value = dataTemp
-            removeGifLiveData.value = true
+            val data = state.value.gifData.copy(active = false)
+            repository.removeGif(data)
+            removeGifId.data.value = state.value.gifData
+            state.value = state.value.copy(gifData = data)
             cancel()
         }
     }
@@ -58,12 +55,12 @@ class GifDetailViewModelImpl(
         viewModelScope.launch {
             try {
                 delay(500)
-                dataTemp.like = !dataTemp.like
-                repository.likeGif(dataTemp)
-                likeGifLiveData.value = dataTemp.like
-                likeGifId.data.value = dataTemp
+                val data = state.value.gifData.copy(like = !state.value.gifData.like)
+                repository.likeGif(data)
+                likeGifId.data.emit(data)
+                state.value = state.value.copy(gifData = data)
             } catch (e: Exception) {
-                errorLikeGifLiveData.value = e.message
+                e.message?.let { state.value = state.value.copy(errorGif = e.message!!) }
             }
 
             cancel()
@@ -72,7 +69,7 @@ class GifDetailViewModelImpl(
 
 
     override fun setGifToScreen(img: ImageView) {
-        dataTemp.full_url?.let {
+        state.value.gifData.full_url?.let {
             val imgUri = it.toUri().buildUpon().scheme("https").build()
             Glide.with(img.context)
                 .load(imgUri)

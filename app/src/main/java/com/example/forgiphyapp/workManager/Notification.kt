@@ -12,7 +12,7 @@ import com.example.forgiphyapp.R
 import javax.inject.Inject
 
 //class Notification @Inject constructor(private val appContext: Context) {
-class Notification (private val appContext: Context) {
+class Notification(private val appContext: Context) {
 
     fun showNotification(title: String, text: String, intent: Intent, notifyId: String, id: Int) {
 

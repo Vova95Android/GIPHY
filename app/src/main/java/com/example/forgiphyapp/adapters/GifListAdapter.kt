@@ -33,31 +33,29 @@ class GifListAdapter(
         RecyclerView.ViewHolder(binding.root) {
         fun bind(data: GifData, listener: OnClickListener, likeListener: OnLikeListener) {
 
-            if ((data.id != "error") && (data.full_url != "error")) {
-                itemView.setOnClickListener { listener.onClick(data) }
-                binding.imageLike.setOnClickListener { likeListener.onClick(data) }
-                val drawable = if (data.like) AppCompatResources.getDrawable(
-                    binding.imageLike.context,
-                    R.drawable.ic_like
-                )
-                else AppCompatResources.getDrawable(
-                    binding.imageLike.context,
-                    R.drawable.ic_no_like
-                )
-                binding.imageLike.setImageDrawable(drawable)
+            itemView.setOnClickListener { listener.onClick(data) }
+            binding.imageLike.setOnClickListener { likeListener.onClick(data) }
+            val drawable = if (data.like) AppCompatResources.getDrawable(
+                binding.imageLike.context,
+                R.drawable.ic_like
+            )
+            else AppCompatResources.getDrawable(
+                binding.imageLike.context,
+                R.drawable.ic_no_like
+            )
+            binding.imageLike.setImageDrawable(drawable)
 
-                data.preview_url?.let {
-                    Glide.with(binding.gifItem.context)
-                        .load(
-                            it.toUri().buildUpon().scheme("https").build()
-                        )
-                        .apply(
-                            RequestOptions()
-                                .placeholder(R.drawable.loading_animation)
-                                .error(R.drawable.ic_broken_image)
-                        )
-                        .into(binding.gifItem)
-                }
+            data.preview_url?.let {
+                Glide.with(binding.gifItem.context)
+                    .load(
+                        it.toUri().buildUpon().scheme("https").build()
+                    )
+                    .apply(
+                        RequestOptions()
+                            .placeholder(R.drawable.loading_animation)
+                            .error(R.drawable.ic_broken_image)
+                    )
+                    .into(binding.gifItem)
             }
 
         }
@@ -73,11 +71,11 @@ class GifListAdapter(
 
     class DiffCallback : DiffUtil.ItemCallback<GifData>() {
         override fun areItemsTheSame(oldItem: GifData, newItem: GifData): Boolean {
-            return ((oldItem.id == newItem.id) && (oldItem.like == newItem.like))
+            return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(oldItem: GifData, newItem: GifData): Boolean {
-            return oldItem.id == newItem.id
+            return oldItem.like == newItem.like
         }
     }
 }
