@@ -54,7 +54,7 @@ class GifRepositoryImpl(
     private var startPage = 0
     private var endPage = 0
     private var searchData = "H"
-    private var nextButtonActive=true
+    private var nextButtonActive = true
 
     override fun previousButtonIsActive(): Boolean {
         return startPage >= limit
@@ -78,7 +78,7 @@ class GifRepositoryImpl(
 
 
         var limitTemp = limit
-        nextButtonActive=true
+        nextButtonActive = true
 
         if (search != searchData) {
             offsetData = 0
@@ -137,7 +137,7 @@ class GifRepositoryImpl(
             }
             if (listSizeOld == listSize) {
                 listSize = limit
-                nextButtonActive=false
+                nextButtonActive = false
             }
         }
         if ((nextPage == true) || (nextPage == null)) endPage = offsetData

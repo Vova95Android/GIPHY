@@ -95,7 +95,6 @@ class GifListViewModelImpl(
         jobRemove = viewModelScope.launch {
             removeGifId.data.collect {
                 handleAction(needLoader = false)
-                removeGifId.data.value = GifData("", "", "", false, false)
             }
         }
 

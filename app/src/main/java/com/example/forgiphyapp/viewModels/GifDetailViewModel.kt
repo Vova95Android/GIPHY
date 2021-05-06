@@ -45,7 +45,7 @@ class GifDetailViewModelImpl(
         viewModelScope.launch {
             val data = state.value.gifData.copy(active = false)
             repository.removeGif(data)
-            removeGifId.data.value = state.value.gifData
+            removeGifId.data.emit(state.value.gifData)
             state.value = state.value.copy(gifData = data)
             cancel()
         }
