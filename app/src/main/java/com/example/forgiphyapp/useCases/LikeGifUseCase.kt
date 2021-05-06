@@ -73,7 +73,6 @@ class LikeGifUseCaseImpl(val database: GifDatabaseDao) : LikeGifUseCase {
     }
 
 
-
     override fun previousButtonIsActive(): Boolean {
         return startPage >= limit
     }

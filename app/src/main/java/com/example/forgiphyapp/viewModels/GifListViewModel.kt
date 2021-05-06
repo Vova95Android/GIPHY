@@ -109,7 +109,7 @@ class GifListViewModelImpl(
     private fun handleAction(nextPage: Boolean? = null, needLoader: Boolean = true) {
 
         if (!mutex.isLocked) {
-        if (needLoader) state.value = state.value.copy(isLoading = true, data = listOf())
+            if (needLoader) state.value = state.value.copy(isLoading = true, data = listOf())
             job?.cancel()
             job = viewModelScope.launch {
                 mutex.withLock {
@@ -134,10 +134,12 @@ class GifListViewModelImpl(
                             )
                         }
                     } catch (e: Exception) {
-                        state.value=state.value.copy(
+                        state.value = state.value.copy(
                             isLoading = false,
                             data = emptyList(),
-                            error = ErrorState(e.message!!, offlineGifUseCase.getGif(nextPage))
+                            error = ErrorState(e.message!!, offlineGifUseCase.getGif(nextPage)),
+                            previousActiveButton = loadGifUseCase.previousButtonIsActive(),
+                            nextActiveButton = loadGifUseCase.nextButtonIsActive()
                         )
                     }
                 }

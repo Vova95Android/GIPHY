@@ -93,7 +93,11 @@ class LoadGifUseCaseImpl(
         return listResult
     }
 
-    private suspend fun loadGifFromSource(searchData: String, limit: Int, offsetData: Int): List<GifData> {
+    private suspend fun loadGifFromSource(
+        searchData: String,
+        limit: Int,
+        offsetData: Int
+    ): List<GifData> {
         var listTemp = dataSource.getGif(searchData, limit, offsetData)
         val actualData = database.getAllGifData()
         listTemp = removeGif(listTemp, actualData)
