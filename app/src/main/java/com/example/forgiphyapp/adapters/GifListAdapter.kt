@@ -14,14 +14,15 @@ import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.databinding.GifItemBinding
 
 class GifListAdapter(
-    private val listener: OnClickListener
+    private val listener: OnClickListener,
+    private val likeListener: OnLikeListener
 ) :
     ListAdapter<GifData, GifListAdapter.GifListViewHolder>(DiffCallback()) {
 
 
     override fun onBindViewHolder(holder: GifListViewHolder, position: Int) {
         val item = getItem(position)
-        holder.bind(item, listener)
+        holder.bind(item, listener, likeListener)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GifListViewHolder {
@@ -30,10 +31,11 @@ class GifListAdapter(
 
     class GifListViewHolder(private var binding: GifItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(data: GifData, listener: OnClickListener) {
+        fun bind(data: GifData, listener: OnClickListener, likeListener: OnLikeListener) {
 
             if ((data.id != "error") && (data.full_url != "error")) {
                 itemView.setOnClickListener { listener.onClick(data) }
+                binding.imageLike.setOnClickListener { likeListener.onClick(data) }
                 val drawable = if (data.like) AppCompatResources.getDrawable(
                     binding.imageLike.context,
                     R.drawable.ic_like
@@ -63,6 +65,10 @@ class GifListAdapter(
 
     class OnClickListener(val clickListener: (data: GifData) -> Unit) {
         fun onClick(data: GifData) = clickListener(data)
+    }
+
+    class OnLikeListener(val likeListener: (data: GifData) -> Unit) {
+        fun onClick(data: GifData) = likeListener(data)
     }
 
     class DiffCallback : DiffUtil.ItemCallback<GifData>() {

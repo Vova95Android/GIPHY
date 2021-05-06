@@ -1,6 +1,5 @@
 package com.example.forgiphyapp.mvi.state
 
-import androidx.lifecycle.LiveData
 import com.example.forgiphyapp.database.GifData
 
 data class MainState(
@@ -11,6 +10,5 @@ data class MainState(
     val search: String = "B",
     val newData: List<GifData> = listOf(),
     val previousActiveButton: Boolean = false,
-    val linearOrGrid: Boolean = false,
-    val savedGifLiveData: LiveData<List<GifData>>
+    val linearOrGrid: Boolean = false
 )

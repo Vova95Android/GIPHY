@@ -14,6 +14,8 @@ import com.example.forgiphyapp.pagingApi.PagingSourceGif
 import com.example.forgiphyapp.pagingApi.PagingSourceGifImpl
 import com.example.forgiphyapp.repository.GifRepository
 import com.example.forgiphyapp.repository.GifRepositoryImpl
+import com.example.forgiphyapp.repository.LikeGif
+import com.example.forgiphyapp.repository.RemoveGif
 import com.example.forgiphyapp.test.PagingSourceTest
 import com.example.forgiphyapp.useCases.*
 import com.example.forgiphyapp.vievModelsFactory.GifDetailViewModelFactory
@@ -93,9 +95,9 @@ val appModule = module {
 
     factory { Notification(androidContext()) }
 
-    viewModel<GifListViewModel> { GifListViewModelImpl(get()) }
+    viewModel<GifListViewModel> { GifListViewModelImpl(get(), get(), get()) }
 
-    viewModel<GifDetailViewModel> { GifDetailViewModelImpl(get(), get()) }
+    viewModel<GifDetailViewModel> { GifDetailViewModelImpl(get(), get(), get(), get()) }
 
     factory<LoadGifUseCase> { LoadGifUseCaseImpl(get(), get()) }
 
@@ -106,6 +108,10 @@ val appModule = module {
     factory<LikeGifUseCase> { LikeGifUseCaseImpl(get()) }
 
     factory<OfflineGifUseCase> { OfflineGifUseCaseImpl(get()) }
+
+    single { RemoveGif() }
+
+    single { LikeGif() }
 
 
 }

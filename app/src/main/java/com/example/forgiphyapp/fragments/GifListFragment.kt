@@ -37,7 +37,11 @@ class GifListFragment : Fragment() {
                                 it.like
                             )
                     )
-        })
+        },
+            GifListAdapter.OnLikeListener {
+                it.like = !it.like
+                lifecycleScope.launch { viewModel.likeGif(it) }
+            })
     }
 
     private val viewModel: GifListViewModel by viewModel()
@@ -52,15 +56,15 @@ class GifListFragment : Fragment() {
     ): View {
         binding = FragmentGifListBinding.inflate(inflater)
 
-        WorkManager.getInstance(this.requireActivity()).enqueue(uploadWorkerRequest)
-
-        binding!!.imageList.adapter = adapter
-
         return binding!!.root
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        WorkManager.getInstance(this.requireActivity()).enqueue(uploadWorkerRequest)
+
+        binding!!.imageList.adapter = adapter
 
         binding!!.refreshLayout.setOnRefreshListener {
             viewModel.refresh()
@@ -72,9 +76,7 @@ class GifListFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if ((s != null) && (s.isNotEmpty()) && (count != before)) {
-                    viewModel.searchNewData(s.toString())
-                }
+                if (!s.isNullOrEmpty()) viewModel.searchNewData(s.toString())
             }
         })
 
@@ -94,9 +96,10 @@ class GifListFragment : Fragment() {
     }
 
     private fun observeViewModel() {
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenStarted {
             try {
                 viewModel.state.collect { state ->
+                    Log.i("GifListFragment", "new State")
                     if (state.isLoading) {
                         binding!!.progressBar.visibility = View.VISIBLE
                         binding!!.imageList.visibility = View.GONE
@@ -132,11 +135,11 @@ class GifListFragment : Fragment() {
             }
         }
 
-        viewModel.state.value.savedGifLiveData.observe(viewLifecycleOwner, {
-            viewModel.newDataFromDatabase(it)
-            Log.i("GifListFragment", it.size.toString())
-            viewModel.newDataOrRefresh(viewModel.state.value.search)
-        })
+//        viewModel.state.value.savedGifLiveData.observe(viewLifecycleOwner, {
+//            viewModel.newDataFromDatabase(it)
+//            Log.i("GifListFragment", it.size.toString())
+//            viewModel.newDataOrRefresh(viewModel.state.value.search)
+//        })
     }
 
 

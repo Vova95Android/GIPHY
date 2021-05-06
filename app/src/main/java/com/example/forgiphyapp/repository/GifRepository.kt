@@ -69,6 +69,7 @@ class GifRepositoryImpl(
         nextPage: Boolean?
     ): List<GifData> {
 
+
         var limitTemp = limit
 
         if (search != searchData) {
@@ -95,6 +96,7 @@ class GifRepositoryImpl(
         var listSize = 0
         var listResult = listOf<GifData>()
         while (listSize < limit) {
+            val listSizeOld = listSize
             val listResultTemp: List<GifData> = try {
                 if (likeGif) likeGifUseCase.getListLikeGif(limitTemp, offsetData)
                 else loadGifUseCase.getGif(searchData, limitTemp, offsetData)
@@ -125,7 +127,7 @@ class GifRepositoryImpl(
                 listSize = limit
                 offsetData = 0
             }
-            if ((savedGifLiveData.value?.size!! < offsetData) && (likeGif)) listSize = limit
+            if (listSizeOld == listSize) listSize = limit
         }
         if ((nextPage == true) || (nextPage == null)) endPage = offsetData
         else startPage = offsetData + limitTemp

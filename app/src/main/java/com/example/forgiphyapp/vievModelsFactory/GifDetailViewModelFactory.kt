@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabaseDao
 import com.example.forgiphyapp.repository.GifRepository
+import com.example.forgiphyapp.repository.LikeGif
+import com.example.forgiphyapp.repository.RemoveGif
 import com.example.forgiphyapp.viewModels.GifDetailViewModel
 import com.example.forgiphyapp.viewModels.GifDetailViewModelImpl
 import javax.inject.Inject
@@ -17,7 +19,7 @@ class GifDetailViewModelFactory (
     @Suppress("unchecked_cast")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(GifDetailViewModelImpl::class.java)) {
-            return GifDetailViewModelImpl(repository, GifData("","","",true, false)) as T
+            return GifDetailViewModelImpl(repository, GifData("","","",true, false), LikeGif(), RemoveGif()) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
