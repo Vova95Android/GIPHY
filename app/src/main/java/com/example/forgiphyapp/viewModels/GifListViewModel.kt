@@ -29,8 +29,6 @@ abstract class GifListViewModel : ViewModel() {
 
     abstract fun linearOrGrid(set: Boolean)
 
-    abstract fun newDataOrRefresh(searchData: String)
-
     abstract fun newDataFromDatabase(listData: List<GifData>)
 
     abstract fun getLikeGif()
@@ -77,25 +75,6 @@ class GifListViewModelImpl(
         state.value = newState(linearOrGrid = set)
     }
 
-
-    override fun newDataOrRefresh(searchData: String) {
-
-        var needRefresh = false
-        if ((!repository.actualData.isNullOrEmpty()) && (!state.value.newData.isNullOrEmpty()) && (searchData == state.value.search)) {
-            for (dataPos in repository.actualData!!.indices) {
-                if ((state.value.newData[dataPos].active != repository.actualData!![dataPos].active) || (state.value.newData[dataPos].like != repository.actualData!![dataPos].like))
-                    needRefresh = true
-            }
-        } else {
-            needRefresh = true
-        }
-        state.value = newState(search = searchData)
-        repository.actualData = state.value.newData
-        if (needRefresh) {
-            handleAction()
-        }
-    }
-
     private var job: Job? = null
     private var jobLike: Job
     private var jobRemove: Job
@@ -140,7 +119,6 @@ class GifListViewModelImpl(
         job?.cancel()
         if (needLoader) state.value = newState(isLoading = true, data = listOf(), error = listOf())
 
-        Log.e("GifListViewModel", "start load")
         job = viewModelScope.launch {
             val list = repository.getGif(state.value.search, state.value.likeGif, nextPage)
             if (list.isNotEmpty())
@@ -152,8 +130,6 @@ class GifListViewModelImpl(
                     state.value = newState(isLoading = false, data = listOf(), error = list)
 
                 }
-            Log.e("GifListViewModel", "end load")
-            delay(500)
         }
     }
 
