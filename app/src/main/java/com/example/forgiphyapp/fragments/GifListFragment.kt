@@ -8,10 +8,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewbinding.ViewBinding
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import com.example.forgiphyapp.adapters.GifListAdapter
@@ -19,19 +21,47 @@ import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
 import com.example.forgiphyapp.viewModels.GifListViewModel
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class GifListFragment : Fragment() {
+
+abstract class BaseFragment<VB: ViewBinding,VM : ViewModel> : Fragment() {
+    protected abstract val viewModel: VM
+    private var baseBinding: VB? = null
+    protected val binding get() = baseBinding
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        super.onCreateView(inflater, container, savedInstanceState)
+        baseBinding = getViewBinding()
+        return baseBinding!!.root
+    }
+
+    abstract fun getViewBinding(): VB?
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        baseBinding=null
+    }
+
+}
+
+
+class GifListFragment : BaseFragment<FragmentGifListBinding,GifListViewModel>() {
+
+    override val viewModel by viewModel<GifListViewModel>()
+
+    override fun getViewBinding(): FragmentGifListBinding = FragmentGifListBinding.inflate(layoutInflater)
+
+
+
 
     private val adapter: GifListAdapter by lazy {
         GifListAdapter({ toDetailFragment(it) }, { viewModel.likeGif(it) })
     }
-
-    private val viewModel: GifListViewModel by viewModel()
-
-    private val uploadWorkerRequest: WorkRequest by inject()
 
     private fun toDetailFragment(data: GifData) {
         if (!data.full_url.isNullOrEmpty())
@@ -42,17 +72,7 @@ class GifListFragment : Fragment() {
                 )
     }
 
-    var binding: FragmentGifListBinding? = null
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentGifListBinding.inflate(inflater)
-
-        return binding!!.root
-    }
-
+    private val uploadWorkerRequest: WorkRequest by inject()
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -132,10 +152,5 @@ class GifListFragment : Fragment() {
         }
     }
 
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        binding = null
-    }
 
 }

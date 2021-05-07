@@ -57,19 +57,20 @@ class GifListAdapter(
                 itemView.setOnClickListener { clickListener(data) }
                 binding.imageLike.setOnClickListener { likeListener(data) }
 
+                val url = if (!data.preview_url.isNullOrEmpty()) data.preview_url
+                else data.full_url!!
 
-                data.preview_url?.let {
-                    Glide.with(binding.gifItem.context)
-                        .load(
-                            it.toUri().buildUpon().scheme("https").build()
-                        )
-                        .apply(
-                            RequestOptions()
-                                .placeholder(R.drawable.loading_animation)
-                                .error(R.drawable.ic_broken_image)
-                        )
-                        .into(binding.gifItem)
-                }
+                Glide.with(binding.gifItem.context)
+                    .load(
+                        url.toUri().buildUpon().scheme("https").build()
+                    )
+                    .apply(
+                        RequestOptions()
+                            .placeholder(R.drawable.loading_animation)
+                            .error(R.drawable.ic_broken_image)
+                    )
+                    .into(binding.gifItem)
+
             }
             val drawable = if (data.like) AppCompatResources.getDrawable(
                 binding.imageLike.context,
