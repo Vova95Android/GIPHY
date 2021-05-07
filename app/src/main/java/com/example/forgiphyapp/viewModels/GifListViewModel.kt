@@ -163,7 +163,6 @@ class GifListViewModelImpl(
 
     }
 
-
     override fun getLikeGif() {
         state.value = state.value.copy(likeGif = !state.value.likeGif)
         handleAction()
