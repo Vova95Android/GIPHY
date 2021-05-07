@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import com.example.forgiphyapp.adapters.GifListAdapter
+import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
 import com.example.forgiphyapp.viewModels.GifListViewModel
 import kotlinx.coroutines.flow.collect
@@ -25,24 +26,22 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class GifListFragment : Fragment() {
 
     private val adapter: GifListAdapter by lazy {
-        GifListAdapter(GifListAdapter.OnClickListener {
-            if (!it.full_url.isNullOrEmpty())
-                this.findNavController()
-                    .navigate(
-                        GifListFragmentDirections
-                            .actionGifListFragmentToGifDetailFragment(
-                                it
-                            )
-                    )
-        },
-            GifListAdapter.OnLikeListener {
-                lifecycleScope.launch { viewModel.likeGif(it) }
-            })
+        GifListAdapter({ toDetailFragment(it) },
+        { viewModel.likeGif(it)})
     }
 
     private val viewModel: GifListViewModel by viewModel()
 
     private val uploadWorkerRequest: WorkRequest by inject()
+
+    private fun toDetailFragment(data: GifData){
+        if (!data.full_url.isNullOrEmpty())
+            this.findNavController()
+                .navigate(
+                    GifListFragmentDirections
+                        .actionGifListFragmentToGifDetailFragment(data)
+                )
+    }
 
     var binding: FragmentGifListBinding? = null
 

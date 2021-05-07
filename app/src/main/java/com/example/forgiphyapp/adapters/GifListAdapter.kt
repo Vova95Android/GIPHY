@@ -14,15 +14,15 @@ import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.databinding.GifItemBinding
 
 class GifListAdapter(
-    private val listener: OnClickListener,
-    private val likeListener: OnLikeListener
+    private val clickListener: (GifData)->Unit,
+    private val likeListener: (GifData)->Unit
 ) :
     ListAdapter<GifData, GifListAdapter.GifListViewHolder>(DiffCallback()) {
 
 
     override fun onBindViewHolder(holder: GifListViewHolder, position: Int) {
         val item = getItem(position)
-        holder.bind(item, listener, likeListener)
+        holder.bind(item, clickListener, likeListener)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GifListViewHolder {
@@ -31,10 +31,10 @@ class GifListAdapter(
 
     class GifListViewHolder(private var binding: GifItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(data: GifData, listener: OnClickListener, likeListener: OnLikeListener) {
+        fun bind(data: GifData, clickListener: (GifData) -> Unit, likeListener: (GifData) -> Unit) {
 
-            itemView.setOnClickListener { listener.onClick(data) }
-            binding.imageLike.setOnClickListener { likeListener.onClick(data) }
+            itemView.setOnClickListener { clickListener(data) }
+            binding.imageLike.setOnClickListener { likeListener(data)}
             val drawable = if (data.like) AppCompatResources.getDrawable(
                 binding.imageLike.context,
                 R.drawable.ic_like

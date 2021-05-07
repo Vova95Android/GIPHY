@@ -10,8 +10,8 @@ import com.example.forgiphyapp.R
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.mvi.state.GifDetailState
 import com.example.forgiphyapp.useCases.LikeGif
-import com.example.forgiphyapp.useCases.RemoveGif
 import com.example.forgiphyapp.useCases.LikeGifUseCase
+import com.example.forgiphyapp.useCases.RemoveGif
 import com.example.forgiphyapp.useCases.RemoveGifUseCase
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -60,7 +60,6 @@ class GifDetailViewModelImpl(
             cancel()
         }
     }
-
 
     override fun setGifToScreen(img: ImageView) {
         state.value.gifData.full_url?.let {
