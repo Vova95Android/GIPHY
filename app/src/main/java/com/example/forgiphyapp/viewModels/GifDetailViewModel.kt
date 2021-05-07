@@ -2,8 +2,6 @@ package com.example.forgiphyapp.viewModels
 
 import android.widget.ImageView
 import androidx.core.net.toUri
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.forgiphyapp.R
@@ -17,9 +15,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
-abstract class GifDetailViewModel : ViewModel() {
+abstract class GifDetailViewModel : BaseViewModel() {
     abstract val state: StateFlow<GifDetailState>
     abstract fun removeGif()
     abstract fun setGifToScreen(img: ImageView)
@@ -37,7 +34,7 @@ class GifDetailViewModelImpl(
     override val state = MutableStateFlow(GifDetailState(data))
 
     override fun removeGif() {
-        viewModelScope.launch {
+        launch {
             val data = state.value.gifData.copy(active = false)
             removeGifUseCase.removeGif(data)
             removeGifId.data.emit(state.value.gifData)
@@ -47,7 +44,7 @@ class GifDetailViewModelImpl(
     }
 
     override fun likeGif() {
-        viewModelScope.launch {
+        launch {
             try {
                 delay(500)
                 val data = state.value.gifData.copy(like = !state.value.gifData.like)

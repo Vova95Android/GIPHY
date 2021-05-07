@@ -14,8 +14,8 @@ import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.databinding.GifItemBinding
 
 class GifListAdapter(
-    private val clickListener: (GifData)->Unit,
-    private val likeListener: (GifData)->Unit
+    private val clickListener: (GifData) -> Unit,
+    private val likeListener: (GifData) -> Unit
 ) :
     ListAdapter<GifData, GifListAdapter.GifListViewHolder>(DiffCallback()) {
 
@@ -34,7 +34,7 @@ class GifListAdapter(
         fun bind(data: GifData, clickListener: (GifData) -> Unit, likeListener: (GifData) -> Unit) {
 
             itemView.setOnClickListener { clickListener(data) }
-            binding.imageLike.setOnClickListener { likeListener(data)}
+            binding.imageLike.setOnClickListener { likeListener(data) }
             val drawable = if (data.like) AppCompatResources.getDrawable(
                 binding.imageLike.context,
                 R.drawable.ic_like

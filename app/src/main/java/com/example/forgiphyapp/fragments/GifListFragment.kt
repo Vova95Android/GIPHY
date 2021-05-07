@@ -26,15 +26,14 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class GifListFragment : Fragment() {
 
     private val adapter: GifListAdapter by lazy {
-        GifListAdapter({ toDetailFragment(it) },
-        { viewModel.likeGif(it)})
+        GifListAdapter({ toDetailFragment(it) }, { viewModel.likeGif(it) })
     }
 
     private val viewModel: GifListViewModel by viewModel()
 
     private val uploadWorkerRequest: WorkRequest by inject()
 
-    private fun toDetailFragment(data: GifData){
+    private fun toDetailFragment(data: GifData) {
         if (!data.full_url.isNullOrEmpty())
             this.findNavController()
                 .navigate(
