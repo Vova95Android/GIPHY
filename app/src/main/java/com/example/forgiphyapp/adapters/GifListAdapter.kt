@@ -33,7 +33,9 @@ class GifListAdapter(
         val item = getItem(position)
         val onlyLike: Boolean = if (payloads.isNotEmpty()) {
             payloads[0] as Boolean
-        } else { false }
+        } else {
+            false
+        }
         holder.bind(item, onlyLike, clickListener, likeListener)
     }
 
@@ -46,12 +48,12 @@ class GifListAdapter(
         RecyclerView.ViewHolder(binding.root) {
         fun bind(
             data: GifData,
-            onliLike: Boolean,
+            onlyLike: Boolean,
             clickListener: (GifData) -> Unit,
             likeListener: (GifData) -> Unit
         ) {
 
-            if (!onliLike) {
+            if (!onlyLike) {
                 itemView.setOnClickListener { clickListener(data) }
                 binding.imageLike.setOnClickListener { likeListener(data) }
 
@@ -69,24 +71,16 @@ class GifListAdapter(
                         .into(binding.gifItem)
                 }
             }
-                val drawable = if (data.like) AppCompatResources.getDrawable(
-                    binding.imageLike.context,
-                    R.drawable.ic_like
-                )
-                else AppCompatResources.getDrawable(
-                    binding.imageLike.context,
-                    R.drawable.ic_no_like
-                )
-                binding.imageLike.setImageDrawable(drawable)
+            val drawable = if (data.like) AppCompatResources.getDrawable(
+                binding.imageLike.context,
+                R.drawable.ic_like
+            )
+            else AppCompatResources.getDrawable(
+                binding.imageLike.context,
+                R.drawable.ic_no_like
+            )
+            binding.imageLike.setImageDrawable(drawable)
         }
-    }
-
-    class OnClickListener(val clickListener: (data: GifData) -> Unit) {
-        fun onClick(data: GifData) = clickListener(data)
-    }
-
-    class OnLikeListener(val likeListener: (data: GifData) -> Unit) {
-        fun onClick(data: GifData) = likeListener(data)
     }
 
     class DiffCallback : DiffUtil.ItemCallback<GifData>() {
