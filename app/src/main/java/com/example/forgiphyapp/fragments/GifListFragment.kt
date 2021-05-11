@@ -26,18 +26,29 @@ import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 import org.koin.core.qualifier.named
 import kotlin.reflect.KClass
 
 
-abstract class BaseFragment<VB : ViewBinding, VM : BaseViewModel>(name: String): Fragment() {
-    private val baseViewModel: BaseViewModel by viewModel(qualifier = named(name))
+abstract class BaseFragment<VB : ViewBinding, VM : BaseViewModel>(
+    name: String,
+    data: Boolean = false
+) : Fragment() {
+
+    private val baseViewModel: BaseViewModel by viewModel(qualifier = named(name), parameters = {
+        parametersOf(
+            if (data) GifDetailFragmentArgs.fromBundle(requireArguments()).gifData else null
+        )
+    })
+
     protected val viewModel: VM
-    get() {
-        return baseViewModel as VM
-    }
+        get() {
+            return baseViewModel as VM
+        }
     private var baseBinding: VB? = null
     protected val binding get() = baseBinding
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
