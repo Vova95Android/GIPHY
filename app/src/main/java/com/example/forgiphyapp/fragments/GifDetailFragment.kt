@@ -14,11 +14,13 @@ import com.example.forgiphyapp.viewModels.GifDetailViewModel
 import kotlinx.coroutines.flow.collect
 
 class GifDetailFragment :
-    BaseFragment<GifDetailFragmentBinding, GifDetailViewModel>(Static().gifDetailFragmentId, true) {
-
-
-    override fun getViewBinding(): GifDetailFragmentBinding =
-        GifDetailFragmentBinding.inflate(layoutInflater)
+    BaseFragment<GifDetailFragmentBinding, GifDetailViewModel>(
+        Static().gifDetailFragmentId,
+        { GifDetailFragmentBinding.inflate(it) }) {
+    
+    override fun getParameters(): Any {
+        return GifDetailFragmentArgs.fromBundle(requireArguments()).gifData
+    }
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

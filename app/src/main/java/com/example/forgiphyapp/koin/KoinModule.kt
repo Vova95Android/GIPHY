@@ -1,6 +1,5 @@
 package com.example.forgiphyapp.koin
 
-import androidx.lifecycle.ViewModel
 import androidx.room.Room
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkRequest

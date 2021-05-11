@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
@@ -23,30 +22,30 @@ import com.example.forgiphyapp.databinding.FragmentGifListBinding
 import com.example.forgiphyapp.viewModels.BaseViewModel
 import com.example.forgiphyapp.viewModels.GifListViewModel
 import kotlinx.coroutines.flow.collect
-import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.getViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.koin.core.qualifier.named
-import kotlin.reflect.KClass
 
 
 abstract class BaseFragment<VB : ViewBinding, VM : BaseViewModel>(
     name: String,
-    data: Boolean = false
+    val bindingInflate: (LayoutInflater) -> VB
 ) : Fragment() {
 
     private val baseViewModel: BaseViewModel by viewModel(qualifier = named(name), parameters = {
         parametersOf(
-            if (data) GifDetailFragmentArgs.fromBundle(requireArguments()).gifData else null
+            getParameters()
         )
     })
+
+    abstract fun getParameters(): Any?
 
     protected val viewModel: VM
         get() {
             return baseViewModel as VM
         }
+
     private var baseBinding: VB? = null
     protected val binding get() = baseBinding
 
@@ -57,11 +56,9 @@ abstract class BaseFragment<VB : ViewBinding, VM : BaseViewModel>(
         savedInstanceState: Bundle?
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-        baseBinding = getViewBinding()
+        baseBinding = bindingInflate(layoutInflater)
         return baseBinding!!.root
     }
-
-    abstract fun getViewBinding(): VB?
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -71,11 +68,12 @@ abstract class BaseFragment<VB : ViewBinding, VM : BaseViewModel>(
 }
 
 
-class GifListFragment : BaseFragment<FragmentGifListBinding, GifListViewModel>(Static().gifListFragmentId) {
+class GifListFragment :
+    BaseFragment<FragmentGifListBinding, GifListViewModel>(
+        Static().gifListFragmentId,
+        { FragmentGifListBinding.inflate(it) }) {
 
-
-    override fun getViewBinding(): FragmentGifListBinding =
-        FragmentGifListBinding.inflate(layoutInflater)
+    override fun getParameters(): Any? = null
 
 
     private val adapter: GifListAdapter by lazy {
