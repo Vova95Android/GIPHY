@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
+import com.example.forgiphyapp.Static
 import com.example.forgiphyapp.adapters.GifListAdapter
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
@@ -70,7 +71,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : BaseViewModel>(
 }
 
 
-class GifListFragment : BaseFragment<FragmentGifListBinding, GifListViewModel>("LIST") {
+class GifListFragment : BaseFragment<FragmentGifListBinding, GifListViewModel>(Static().gifListFragmentId) {
 
 
     override fun getViewBinding(): FragmentGifListBinding =

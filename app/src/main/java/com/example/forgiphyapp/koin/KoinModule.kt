@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.room.Room
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkRequest
+import com.example.forgiphyapp.Static
 import com.example.forgiphyapp.api.GifDataSource
 import com.example.forgiphyapp.api.GifDataSourceImpl
 import com.example.forgiphyapp.api.GiphyService
@@ -85,8 +86,8 @@ val appModule = module {
 //        GifDetailViewModelImpl(get(), get(), gifData, get(), get())
 //    }
 
-    viewModel<BaseViewModel> ( named("LIST") ){GifListViewModelImpl(get(), get(), get(), get(), get()) }
-    viewModel<BaseViewModel> ( named("DETAIL") ){(gifData: GifData) ->
+    viewModel<BaseViewModel> ( named(Static().gifListFragmentId) ){GifListViewModelImpl(get(), get(), get(), get(), get()) }
+    viewModel<BaseViewModel> ( named(Static().gifDetailFragmentId) ){(gifData: GifData) ->
         GifDetailViewModelImpl(get(), get(), gifData, get(), get())}
 
     factory<LoadGifUseCase> { LoadGifUseCaseImpl(get(), get()) }
