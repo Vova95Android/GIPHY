@@ -35,6 +35,8 @@ abstract class BaseViewModel : ViewModel() {
 
 abstract class GifListViewModel : BaseViewModel() {
 
+    abstract var lastLinearOrGridState: Boolean
+
     abstract val state: StateFlow<GifListState>
 
     abstract fun searchNewData(data: String)
@@ -61,6 +63,8 @@ class GifListViewModelImpl(
     private val removeGifId: RemoveGif
 ) :
     GifListViewModel() {
+
+    override var lastLinearOrGridState: Boolean = false
 
     override val state = MutableStateFlow(GifListState(isLoading = true))
 
@@ -90,7 +94,10 @@ class GifListViewModelImpl(
                         data
                     }
                 }
-                state.value = state.value.copy(data = temp)
+                state.value = state.value.copy(
+                    data = temp,
+                    onlyLikeOrRemove = true
+                )
             } else if (state.value.error.errorMessage.isNotEmpty()) {
                 state.value = state.value.copy(isLoading = true)
                 val temp = state.value.error.offlineData.map { gif ->
@@ -100,7 +107,8 @@ class GifListViewModelImpl(
                 state.value = state.value.copy(
                     isLoading = false,
                     data = emptyList(),
-                    error = ErrorState(state.value.error.errorMessage, temp)
+                    error = ErrorState(state.value.error.errorMessage, temp),
+                    onlyLikeOrRemove = true
                 )
             }
         }
@@ -123,7 +131,8 @@ class GifListViewModelImpl(
                         data = emptyList(),
                         error = ErrorState(error, offlineGifUseCase.getGif(nextPage)),
                         previousActiveButton = offlineGifUseCase.previousButtonIsActive(),
-                        nextActiveButton = offlineGifUseCase.nextButtonIsActive()
+                        nextActiveButton = offlineGifUseCase.nextButtonIsActive(),
+                        onlyLikeOrRemove = false
                     )
                     errorState.value = ""
                 }
@@ -145,7 +154,8 @@ class GifListViewModelImpl(
                 data = likeGifUseCase.getGif(nextPage),
                 error = ErrorState(),
                 previousActiveButton = likeGifUseCase.previousButtonIsActive(),
-                nextActiveButton = likeGifUseCase.nextButtonIsActive()
+                nextActiveButton = likeGifUseCase.nextButtonIsActive(),
+                onlyLikeOrRemove = false
             )
             else {
                 state.value = state.value.copy(
@@ -156,7 +166,8 @@ class GifListViewModelImpl(
                     ),
                     error = ErrorState(),
                     previousActiveButton = loadGifUseCase.previousButtonIsActive(),
-                    nextActiveButton = loadGifUseCase.nextButtonIsActive()
+                    nextActiveButton = loadGifUseCase.nextButtonIsActive(),
+                    onlyLikeOrRemove = false
                 )
             }
         }

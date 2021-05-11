@@ -20,6 +20,7 @@ import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
 import com.example.forgiphyapp.viewModels.BaseViewModel
 import com.example.forgiphyapp.viewModels.GifListViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -168,10 +169,19 @@ class GifListFragment :
                     binding!!.previousPageButton.isEnabled = state.previousActiveButton
                     binding!!.nextPageButton.isEnabled = state.nextActiveButton
 
-                    if (state.linearOrGrid) {
-                        binding!!.imageList.layoutManager = LinearLayoutManager(activity)
-                    } else {
-                        binding!!.imageList.layoutManager = GridLayoutManager(activity, 3)
+                    if (viewModel.lastLinearOrGridState != state.linearOrGrid) {
+                        viewModel.lastLinearOrGridState = state.linearOrGrid
+                        if (state.linearOrGrid) {
+                            val layout=binding!!.imageList.layoutManager as GridLayoutManager
+                            val pos=layout.findLastVisibleItemPosition()-3
+                            binding!!.imageList.layoutManager = LinearLayoutManager(activity)
+                            binding!!.imageList.scrollToPosition(pos)
+                        } else {
+                            val layout=binding!!.imageList.layoutManager as LinearLayoutManager
+                            val pos=layout.findLastVisibleItemPosition()-3
+                            binding!!.imageList.layoutManager = GridLayoutManager(activity, 3)
+                            binding!!.imageList.scrollToPosition(pos)
+                        }
                     }
 
                 }
