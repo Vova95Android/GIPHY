@@ -3,7 +3,6 @@ package com.example.forgiphyapp.koin
 import androidx.room.Room
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkRequest
-import com.example.forgiphyapp.Static
 import com.example.forgiphyapp.api.GifDataSource
 import com.example.forgiphyapp.api.GifDataSourceImpl
 import com.example.forgiphyapp.api.GiphyService
@@ -21,7 +20,6 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -85,8 +83,8 @@ val appModule = module {
 //        GifDetailViewModelImpl(get(), get(), gifData, get(), get())
 //    }
 
-    viewModel<BaseViewModel> ( named(Static().gifListFragmentId) ){GifListViewModelImpl(get(), get(), get(), get(), get()) }
-    viewModel<BaseViewModel> ( named(Static().gifDetailFragmentId) ){(gifData: GifData) ->
+    viewModel<GifListViewModel>{GifListViewModelImpl(get(), get(), get(), get(), get()) }
+    viewModel<GifDetailViewModel>{(gifData: GifData) ->
         GifDetailViewModelImpl(get(), get(), gifData, get(), get())}
 
     factory<LoadGifUseCase> { LoadGifUseCaseImpl(get(), get()) }

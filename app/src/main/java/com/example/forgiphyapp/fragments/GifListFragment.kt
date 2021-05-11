@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
-import com.example.forgiphyapp.Static
 import com.example.forgiphyapp.adapters.GifListAdapter
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
@@ -25,21 +24,27 @@ import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import org.koin.core.qualifier.named
+import java.lang.reflect.ParameterizedType
+import kotlin.reflect.KClass
 
 
 abstract class BaseFragment<VB : ViewBinding, VM : BaseViewModel>(
-    name: String,
     val bindingInflate: (LayoutInflater) -> VB
 ) : Fragment() {
 
-    private val baseViewModel: BaseViewModel by viewModel(qualifier = named(name), parameters = {
+    private val baseViewModel: VM by viewModel(clazz = viewModelClass(), parameters = {
         parametersOf(
             getParameters()
         )
     })
 
-    open fun getParameters(): Any?=null
+    @Suppress("UNCHECKED_CAST")
+    private fun viewModelClass(): KClass<VM> {
+        return ((javaClass.genericSuperclass as ParameterizedType)
+            .actualTypeArguments[1] as Class<VM>).kotlin
+    }
+
+    open fun getParameters(): Any? = null
 
     protected val viewModel: VM
         get() {
@@ -70,7 +75,6 @@ abstract class BaseFragment<VB : ViewBinding, VM : BaseViewModel>(
 
 class GifListFragment :
     BaseFragment<FragmentGifListBinding, GifListViewModel>(
-        Static().gifListFragmentId,
         { FragmentGifListBinding.inflate(it) }) {
 
 

@@ -8,14 +8,12 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.forgiphyapp.R
-import com.example.forgiphyapp.Static
 import com.example.forgiphyapp.databinding.GifDetailFragmentBinding
 import com.example.forgiphyapp.viewModels.GifDetailViewModel
 import kotlinx.coroutines.flow.collect
 
 class GifDetailFragment :
     BaseFragment<GifDetailFragmentBinding, GifDetailViewModel>(
-        Static().gifDetailFragmentId,
         { GifDetailFragmentBinding.inflate(it) }) {
 
     override fun getParameters(): Any {
