@@ -28,9 +28,7 @@ import java.lang.reflect.ParameterizedType
 import kotlin.reflect.KClass
 
 
-abstract class BaseFragment<VB : ViewBinding, VM : BaseViewModel>(
-    val bindingInflate: (LayoutInflater) -> VB
-) : Fragment() {
+abstract class BaseFragment<VB : ViewBinding, VM : BaseViewModel> : Fragment() {
 
     private val baseViewModel: VM by viewModel(clazz = viewModelClass(), parameters = {
         parametersOf(
@@ -44,11 +42,25 @@ abstract class BaseFragment<VB : ViewBinding, VM : BaseViewModel>(
             .actualTypeArguments[1] as Class<VM>).kotlin
     }
 
+    @Suppress("UNCHECKED_CAST")
+    protected open fun createBindingInstance(inflater: LayoutInflater, container: ViewGroup?): VB {
+        val vbType = (javaClass.genericSuperclass as ParameterizedType).actualTypeArguments[0]
+        val vbClass = vbType as Class<VB>
+        val method = vbClass.getMethod(
+            "inflate",
+            LayoutInflater::class.java,
+            ViewGroup::class.java,
+            Boolean::class.java
+        )
+
+        return method.invoke(null, inflater, container, false) as VB
+    }
+
     open fun getParameters(): Any? = null
 
     protected val viewModel: VM
         get() {
-            return baseViewModel as VM
+            return baseViewModel
         }
 
     private var baseBinding: VB? = null
@@ -59,11 +71,9 @@ abstract class BaseFragment<VB : ViewBinding, VM : BaseViewModel>(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        super.onCreateView(inflater, container, savedInstanceState)
-        baseBinding = bindingInflate(layoutInflater)
-        return baseBinding!!.root
-    }
+    ): View? =
+        createBindingInstance(inflater, container).also { baseBinding = it }.root
+
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -74,8 +84,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : BaseViewModel>(
 
 
 class GifListFragment :
-    BaseFragment<FragmentGifListBinding, GifListViewModel>(
-        { FragmentGifListBinding.inflate(it) }) {
+    BaseFragment<FragmentGifListBinding, GifListViewModel>() {
 
 
     private val adapter: GifListAdapter by lazy {
