@@ -39,7 +39,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : BaseViewModel>(
         )
     })
 
-    abstract fun getParameters(): Any?
+    open fun getParameters(): Any?=null
 
     protected val viewModel: VM
         get() {
@@ -72,8 +72,6 @@ class GifListFragment :
     BaseFragment<FragmentGifListBinding, GifListViewModel>(
         Static().gifListFragmentId,
         { FragmentGifListBinding.inflate(it) }) {
-
-    override fun getParameters(): Any? = null
 
 
     private val adapter: GifListAdapter by lazy {

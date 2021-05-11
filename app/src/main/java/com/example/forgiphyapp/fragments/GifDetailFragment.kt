@@ -17,7 +17,7 @@ class GifDetailFragment :
     BaseFragment<GifDetailFragmentBinding, GifDetailViewModel>(
         Static().gifDetailFragmentId,
         { GifDetailFragmentBinding.inflate(it) }) {
-    
+
     override fun getParameters(): Any {
         return GifDetailFragmentArgs.fromBundle(requireArguments()).gifData
     }
