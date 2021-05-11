@@ -14,10 +14,10 @@ import kotlinx.coroutines.flow.collect
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class GifDetailFragment : BaseFragment<GifDetailFragmentBinding, GifDetailViewModel>() {
+class GifDetailFragment : BaseFragment<GifDetailFragmentBinding, GifDetailViewModel>("DETAIL") {
 
-    override val viewModel by viewModel<GifDetailViewModel>()
-    { parametersOf(GifDetailFragmentArgs.fromBundle(requireArguments()).gifData) }
+    //override val viewModel by viewModel<GifDetailViewModel>()
+    //{ parametersOf(GifDetailFragmentArgs.fromBundle(requireArguments()).gifData) }
 
     override fun getViewBinding(): GifDetailFragmentBinding =
         GifDetailFragmentBinding.inflate(layoutInflater)

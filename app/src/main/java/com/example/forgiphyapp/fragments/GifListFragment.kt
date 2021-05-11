@@ -19,14 +19,23 @@ import androidx.work.WorkRequest
 import com.example.forgiphyapp.adapters.GifListAdapter
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
+import com.example.forgiphyapp.viewModels.BaseViewModel
 import com.example.forgiphyapp.viewModels.GifListViewModel
 import kotlinx.coroutines.flow.collect
+import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.getViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.qualifier.named
+import kotlin.reflect.KClass
 
 
-abstract class BaseFragment<VB : ViewBinding, VM : ViewModel> : Fragment() {
-    protected abstract val viewModel: VM
+abstract class BaseFragment<VB : ViewBinding, VM : BaseViewModel>(name: String): Fragment() {
+    private val baseViewModel: BaseViewModel by viewModel(qualifier = named(name))
+    protected val viewModel: VM
+    get() {
+        return baseViewModel as VM
+    }
     private var baseBinding: VB? = null
     protected val binding get() = baseBinding
 
@@ -50,9 +59,8 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel> : Fragment() {
 }
 
 
-class GifListFragment : BaseFragment<FragmentGifListBinding, GifListViewModel>() {
+class GifListFragment : BaseFragment<FragmentGifListBinding, GifListViewModel>("LIST") {
 
-    override val viewModel by viewModel<GifListViewModel>()
 
     override fun getViewBinding(): FragmentGifListBinding =
         FragmentGifListBinding.inflate(layoutInflater)
@@ -72,6 +80,7 @@ class GifListFragment : BaseFragment<FragmentGifListBinding, GifListViewModel>()
     }
 
     private val uploadWorkerRequest: WorkRequest by inject()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

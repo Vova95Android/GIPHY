@@ -1,5 +1,6 @@
 package com.example.forgiphyapp.koin
 
+import androidx.lifecycle.ViewModel
 import androidx.room.Room
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkRequest
@@ -11,13 +12,8 @@ import com.example.forgiphyapp.database.GifDatabase
 import com.example.forgiphyapp.database.GifDatabaseDao
 import com.example.forgiphyapp.pagingApi.PagingSourceGif
 import com.example.forgiphyapp.pagingApi.PagingSourceGifImpl
-import com.example.forgiphyapp.useCases.LikeGif
-import com.example.forgiphyapp.useCases.RemoveGif
 import com.example.forgiphyapp.useCases.*
-import com.example.forgiphyapp.viewModels.GifDetailViewModel
-import com.example.forgiphyapp.viewModels.GifDetailViewModelImpl
-import com.example.forgiphyapp.viewModels.GifListViewModel
-import com.example.forgiphyapp.viewModels.GifListViewModelImpl
+import com.example.forgiphyapp.viewModels.*
 import com.example.forgiphyapp.workManager.ClearDbWork
 import com.example.forgiphyapp.workManager.Notification
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
@@ -25,6 +21,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -82,11 +79,15 @@ val appModule = module {
 
     factory { Notification(androidContext()) }
 
-    viewModel<GifListViewModel> { GifListViewModelImpl(get(), get(), get(), get(), get()) }
+//    viewModel<GifListViewModel> { GifListViewModelImpl(get(), get(), get(), get(), get()) }
+//
+//    viewModel<GifDetailViewModel> { (gifData: GifData) ->
+//        GifDetailViewModelImpl(get(), get(), gifData, get(), get())
+//    }
 
-    viewModel<GifDetailViewModel> { (gifData: GifData) ->
-        GifDetailViewModelImpl(get(), get(), gifData, get(), get())
-    }
+    viewModel<BaseViewModel> ( named("LIST") ){GifListViewModelImpl(get(), get(), get(), get(), get()) }
+    viewModel<BaseViewModel> ( named("DETAIL") ){(gifData: GifData) ->
+        GifDetailViewModelImpl(get(), get(), gifData, get(), get())}
 
     factory<LoadGifUseCase> { LoadGifUseCaseImpl(get(), get()) }
 
