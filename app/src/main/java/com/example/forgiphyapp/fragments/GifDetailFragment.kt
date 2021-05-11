@@ -11,27 +11,23 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.forgiphyapp.R
+import com.example.forgiphyapp.databinding.FragmentGifListBinding
 import com.example.forgiphyapp.databinding.GifDetailFragmentBinding
 import com.example.forgiphyapp.viewModels.GifDetailViewModel
+import com.example.forgiphyapp.viewModels.GifDetailViewModelImpl
+import com.example.forgiphyapp.viewModels.GifListViewModel
 import kotlinx.coroutines.flow.collect
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class GifDetailFragment : Fragment() {
+class GifDetailFragment : BaseFragment<GifDetailFragmentBinding, GifDetailViewModel>() {
 
-    var binding: GifDetailFragmentBinding? = null
-
-    private val viewModel: GifDetailViewModel by viewModel()
+    override val viewModel by viewModel<GifDetailViewModel>()
     { parametersOf(GifDetailFragmentArgs.fromBundle(requireArguments()).gifData) }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = GifDetailFragmentBinding.inflate(inflater)
+    override fun getViewBinding(): GifDetailFragmentBinding =
+        GifDetailFragmentBinding.inflate(layoutInflater)
 
-        return binding!!.root
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -79,12 +75,6 @@ class GifDetailFragment : Fragment() {
             }
         }
 
-    }
-
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        binding = null
     }
 
 

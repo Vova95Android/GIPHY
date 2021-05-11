@@ -25,7 +25,7 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
-abstract class BaseFragment<VB: ViewBinding,VM : ViewModel> : Fragment() {
+abstract class BaseFragment<VB : ViewBinding, VM : ViewModel> : Fragment() {
     protected abstract val viewModel: VM
     private var baseBinding: VB? = null
     protected val binding get() = baseBinding
@@ -44,19 +44,18 @@ abstract class BaseFragment<VB: ViewBinding,VM : ViewModel> : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        baseBinding=null
+        baseBinding = null
     }
 
 }
 
 
-class GifListFragment : BaseFragment<FragmentGifListBinding,GifListViewModel>() {
+class GifListFragment : BaseFragment<FragmentGifListBinding, GifListViewModel>() {
 
     override val viewModel by viewModel<GifListViewModel>()
 
-    override fun getViewBinding(): FragmentGifListBinding = FragmentGifListBinding.inflate(layoutInflater)
-
-
+    override fun getViewBinding(): FragmentGifListBinding =
+        FragmentGifListBinding.inflate(layoutInflater)
 
 
     private val adapter: GifListAdapter by lazy {
