@@ -179,6 +179,7 @@ class GifListViewModelImpl(
                     onlyLikeOrRemove = false
                 )
             }
+            delay(500)
         }
 
     }

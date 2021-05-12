@@ -19,6 +19,7 @@ import com.example.forgiphyapp.databinding.FragmentGifListBinding
 import com.example.forgiphyapp.viewModels.BaseViewModel
 import com.example.forgiphyapp.viewModels.GifListViewModel
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -30,7 +31,8 @@ import kotlin.reflect.KClass
 abstract class BaseFragment<VM : BaseViewModel>(id: Int) : Fragment(id) {
 
     inline fun <T : ViewBinding> Fragment.viewBinding(
-        crossinline bindingInflater: (LayoutInflater) -> T) =
+        crossinline bindingInflater: (LayoutInflater) -> T
+    ) =
         lazy(LazyThreadSafetyMode.NONE) {
             bindingInflater.invoke(layoutInflater)
         }
@@ -62,7 +64,7 @@ class GifListFragment :
     BaseFragment<GifListViewModel>(R.layout.fragment_gif_list) {
 
 
-    override val binding by viewBinding ( FragmentGifListBinding::bind )
+    override val binding by viewBinding(FragmentGifListBinding::bind)
 
     private val adapter: GifListAdapter by lazy {
         GifListAdapter(
@@ -119,20 +121,22 @@ class GifListFragment :
                         binding.buttonError.visibility = View.GONE
                         binding.textError.visibility = View.GONE
                     }
-                    if (!state.data.isNullOrEmpty()) {
+                    if (state.data.isNotEmpty()) {
+                        adapter.submitList(state.data)
+                        delay(200)
                         binding.progressBar.visibility = View.GONE
                         binding.imageList.visibility = View.VISIBLE
                         binding.buttonError.visibility = View.GONE
                         binding.textError.visibility = View.GONE
-                        adapter.submitList(state.data)
                     }
                     if (state.error.errorMessage.isNotEmpty()) {
+                        adapter.submitList(state.error.offlineData)
+                        delay(200)
                         binding.progressBar.visibility = View.GONE
                         binding.imageList.visibility = View.VISIBLE
                         binding.buttonError.visibility = View.VISIBLE
                         binding.textError.visibility = View.VISIBLE
                         binding.textError.text = state.error.errorMessage
-                        adapter.submitList(state.error.offlineData)
                     }
 
                     binding.previousPageButton.isEnabled = state.previousActiveButton
