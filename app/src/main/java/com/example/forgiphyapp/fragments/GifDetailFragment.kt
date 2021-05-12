@@ -6,14 +6,16 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import com.example.forgiphyapp.R
 import com.example.forgiphyapp.databinding.GifDetailFragmentBinding
 import com.example.forgiphyapp.viewModels.GifDetailViewModel
+import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
 import kotlinx.coroutines.flow.collect
 
 class GifDetailFragment :
-    BaseFragment<GifDetailFragmentBinding, GifDetailViewModel>() {
+    BaseFragment<GifDetailViewModel>(R.layout.gif_detail_fragment) {
+
+    override val binding by viewBinding (GifDetailFragmentBinding::bind)
 
     override fun getParameters(): Any {
         return GifDetailFragmentArgs.fromBundle(requireArguments()).gifData
@@ -23,11 +25,11 @@ class GifDetailFragment :
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.setGifToScreen(binding!!.imageView)
+        viewModel.setGifToScreen(binding.imageView)
 
-        binding!!.removeGifButton.setOnClickListener { viewModel.removeGif() }
+        binding.removeGifButton.setOnClickListener { viewModel.removeGif() }
 
-        binding!!.imageLikeDetail.setOnClickListener { viewModel.likeGif() }
+        binding.imageLikeDetail.setOnClickListener { viewModel.likeGif() }
 
         observeViewModel()
     }
@@ -50,7 +52,7 @@ class GifDetailFragment :
                                 R.drawable.ic_no_like
                             )
                         }
-                    binding!!.imageLikeDetail.setImageDrawable(drawable)
+                    binding.imageLikeDetail.setImageDrawable(drawable)
                     if (state.errorGif.isNotEmpty()) Toast.makeText(
                         context,
                         state.errorGif,

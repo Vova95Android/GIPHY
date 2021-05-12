@@ -52,7 +52,7 @@ val appModule = module {
             .build()
     }
 
-    single<GifDatabaseDao> {
+    single {
         var INSTANCE: GifDatabase? = null
         synchronized(this) {
             var instance = INSTANCE
@@ -86,6 +86,7 @@ val appModule = module {
 //    }
 
     viewModel<GifListViewModel>{GifListViewModelImpl(get(), get(), get(), get(), get(), get()) }
+
     viewModel<GifDetailViewModel>{(gifData: GifData) ->
         GifDetailViewModelImpl(get(), get(), get(), gifData, get(), get())}
 
