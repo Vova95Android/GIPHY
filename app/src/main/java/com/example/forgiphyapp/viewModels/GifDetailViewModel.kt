@@ -6,7 +6,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.forgiphyapp.R
 import com.example.forgiphyapp.database.GifData
+import com.example.forgiphyapp.fragments.GifDetailFragment
 import com.example.forgiphyapp.mvi.state.GifDetailState
+import com.example.forgiphyapp.navigation.Router
 import com.example.forgiphyapp.useCases.LikeGif
 import com.example.forgiphyapp.useCases.LikeGifUseCase
 import com.example.forgiphyapp.useCases.RemoveGif
@@ -21,9 +23,11 @@ abstract class GifDetailViewModel : BaseViewModel() {
     abstract fun removeGif()
     abstract fun setGifToScreen(img: ImageView)
     abstract fun likeGif()
+    abstract fun navigateToGifDetailFragment(fragment: GifDetailFragment)
 }
 
 class GifDetailViewModelImpl(
+    private val router: Router,
     private val removeGifUseCase: RemoveGifUseCase,
     private val likeGifUseCase: LikeGifUseCase,
     data: GifData,
@@ -32,6 +36,10 @@ class GifDetailViewModelImpl(
 ) : GifDetailViewModel() {
 
     override val state = MutableStateFlow(GifDetailState(data))
+
+    override fun navigateToGifDetailFragment(fragment: GifDetailFragment) {
+        router.navigateToGifListFragment(fragment)
+    }
 
     override fun removeGif() {
         launch {

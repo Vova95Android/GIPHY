@@ -9,6 +9,8 @@ import com.example.forgiphyapp.api.GiphyService
 import com.example.forgiphyapp.database.GifData
 import com.example.forgiphyapp.database.GifDatabase
 import com.example.forgiphyapp.database.GifDatabaseDao
+import com.example.forgiphyapp.navigation.Router
+import com.example.forgiphyapp.navigation.RouterImpl
 import com.example.forgiphyapp.pagingApi.PagingSourceGif
 import com.example.forgiphyapp.pagingApi.PagingSourceGifImpl
 import com.example.forgiphyapp.useCases.*
@@ -83,9 +85,11 @@ val appModule = module {
 //        GifDetailViewModelImpl(get(), get(), gifData, get(), get())
 //    }
 
-    viewModel<GifListViewModel>{GifListViewModelImpl(get(), get(), get(), get(), get()) }
+    viewModel<GifListViewModel>{GifListViewModelImpl(get(), get(), get(), get(), get(), get()) }
     viewModel<GifDetailViewModel>{(gifData: GifData) ->
-        GifDetailViewModelImpl(get(), get(), gifData, get(), get())}
+        GifDetailViewModelImpl(get(), get(), get(), gifData, get(), get())}
+
+    factory<Router> { RouterImpl() }
 
     factory<LoadGifUseCase> { LoadGifUseCaseImpl(get(), get()) }
 

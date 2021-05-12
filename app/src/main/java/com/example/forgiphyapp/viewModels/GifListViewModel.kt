@@ -4,8 +4,10 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.forgiphyapp.database.GifData
+import com.example.forgiphyapp.fragments.GifListFragment
 import com.example.forgiphyapp.mvi.state.ErrorState
 import com.example.forgiphyapp.mvi.state.GifListState
+import com.example.forgiphyapp.navigation.Router
 import com.example.forgiphyapp.useCases.LikeGif
 import com.example.forgiphyapp.useCases.RemoveGif
 import com.example.forgiphyapp.useCases.LikeGifUseCase
@@ -39,6 +41,8 @@ abstract class GifListViewModel : BaseViewModel() {
 
     abstract val state: StateFlow<GifListState>
 
+    abstract fun navigateToGifDetailFragment(fragment: GifListFragment, data: GifData)
+
     abstract fun searchNewData(data: String)
 
     abstract fun refresh()
@@ -56,6 +60,7 @@ abstract class GifListViewModel : BaseViewModel() {
 }
 
 class GifListViewModelImpl(
+    private val router: Router,
     private val likeGifUseCase: LikeGifUseCase,
     private val loadGifUseCase: LoadGifUseCase,
     private val offlineGifUseCase: OfflineGifUseCase,
@@ -67,6 +72,10 @@ class GifListViewModelImpl(
     override var lastLinearOrGridState: Boolean = false
 
     override val state = MutableStateFlow(GifListState(isLoading = true))
+
+    override fun navigateToGifDetailFragment(fragment: GifListFragment, data: GifData) {
+        router.navigateToGifDetailFragment(fragment, data)
+    }
 
     override fun refresh() {
         handleAction()

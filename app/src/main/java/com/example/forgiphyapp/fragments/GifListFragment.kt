@@ -32,9 +32,7 @@ import kotlin.reflect.KClass
 abstract class BaseFragment<VB : ViewBinding, VM : BaseViewModel> : Fragment() {
 
     private val baseViewModel: VM by viewModel(clazz = viewModelClass(), parameters = {
-        parametersOf(
-            getParameters()
-        )
+        parametersOf(getParameters())
     })
 
     @Suppress("UNCHECKED_CAST")
@@ -89,17 +87,11 @@ class GifListFragment :
 
 
     private val adapter: GifListAdapter by lazy {
-        GifListAdapter({ toDetailFragment(it) }, { viewModel.likeGif(it) })
+        GifListAdapter(
+            { viewModel.navigateToGifDetailFragment(this, it) },
+            { viewModel.likeGif(it) })
     }
 
-    private fun toDetailFragment(data: GifData) {
-        if (!data.full_url.isNullOrEmpty())
-            this.findNavController()
-                .navigate(
-                    GifListFragmentDirections
-                        .actionGifListFragmentToGifDetailFragment(data)
-                )
-    }
 
     private val uploadWorkerRequest: WorkRequest by inject()
 
@@ -172,13 +164,13 @@ class GifListFragment :
                     if (viewModel.lastLinearOrGridState != state.linearOrGrid) {
                         viewModel.lastLinearOrGridState = state.linearOrGrid
                         if (state.linearOrGrid) {
-                            val layout=binding!!.imageList.layoutManager as GridLayoutManager
-                            val pos=layout.findLastVisibleItemPosition()-3
+                            val layout = binding!!.imageList.layoutManager as GridLayoutManager
+                            val pos = layout.findLastVisibleItemPosition() - 3
                             binding!!.imageList.layoutManager = LinearLayoutManager(activity)
                             binding!!.imageList.scrollToPosition(pos)
                         } else {
-                            val layout=binding!!.imageList.layoutManager as LinearLayoutManager
-                            val pos=layout.findLastVisibleItemPosition()-3
+                            val layout = binding!!.imageList.layoutManager as LinearLayoutManager
+                            val pos = layout.findLastVisibleItemPosition() - 3
                             binding!!.imageList.layoutManager = GridLayoutManager(activity, 3)
                             binding!!.imageList.scrollToPosition(pos)
                         }
