@@ -88,7 +88,7 @@ class GifListFragment :
 
     private val adapter: GifListAdapter by lazy {
         GifListAdapter(
-            { viewModel.navigateToGifDetailFragment(this, it) },
+            { viewModel.navigateToGifDetailFragment(it) },
             { viewModel.likeGif(it) })
     }
 

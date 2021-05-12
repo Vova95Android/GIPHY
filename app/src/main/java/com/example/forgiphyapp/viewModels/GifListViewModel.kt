@@ -41,7 +41,7 @@ abstract class GifListViewModel : BaseViewModel() {
 
     abstract val state: StateFlow<GifListState>
 
-    abstract fun navigateToGifDetailFragment(fragment: GifListFragment, data: GifData)
+    abstract fun navigateToGifDetailFragment(data: GifData)
 
     abstract fun searchNewData(data: String)
 
@@ -73,8 +73,8 @@ class GifListViewModelImpl(
 
     override val state = MutableStateFlow(GifListState(isLoading = true))
 
-    override fun navigateToGifDetailFragment(fragment: GifListFragment, data: GifData) {
-        router.navigateToGifDetailFragment(fragment, data)
+    override fun navigateToGifDetailFragment(data: GifData) {
+        router.navigateToGifDetailFragment(data)
     }
 
     override fun refresh() {

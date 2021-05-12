@@ -57,7 +57,7 @@ class GifDetailFragment :
                         Toast.LENGTH_LONG
                     ).show()
 
-                    if (!state.gifData.active) viewModel.navigateToGifDetailFragment(this@GifDetailFragment)
+                    if (!state.gifData.active) viewModel.navigateToGifDetailFragment()
 
 
                 }

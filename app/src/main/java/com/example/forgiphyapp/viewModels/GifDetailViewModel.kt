@@ -23,7 +23,7 @@ abstract class GifDetailViewModel : BaseViewModel() {
     abstract fun removeGif()
     abstract fun setGifToScreen(img: ImageView)
     abstract fun likeGif()
-    abstract fun navigateToGifDetailFragment(fragment: GifDetailFragment)
+    abstract fun navigateToGifDetailFragment()
 }
 
 class GifDetailViewModelImpl(
@@ -37,8 +37,8 @@ class GifDetailViewModelImpl(
 
     override val state = MutableStateFlow(GifDetailState(data))
 
-    override fun navigateToGifDetailFragment(fragment: GifDetailFragment) {
-        router.navigateToGifListFragment(fragment)
+    override fun navigateToGifDetailFragment() {
+        router.navigateToGifListFragment()
     }
 
     override fun removeGif() {

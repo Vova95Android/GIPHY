@@ -48,7 +48,7 @@ val appModule = module {
 
     factory<WorkRequest> {
         PeriodicWorkRequestBuilder<ClearDbWork>(20, TimeUnit.MINUTES)
-            .setInitialDelay(5, TimeUnit.MINUTES)
+            .setInitialDelay(10, TimeUnit.MINUTES)
             .build()
     }
 
@@ -89,7 +89,7 @@ val appModule = module {
     viewModel<GifDetailViewModel>{(gifData: GifData) ->
         GifDetailViewModelImpl(get(), get(), get(), gifData, get(), get())}
 
-    factory<Router> { RouterImpl() }
+    single<Router> { RouterImpl() }
 
     factory<LoadGifUseCase> { LoadGifUseCaseImpl(get(), get()) }
 
