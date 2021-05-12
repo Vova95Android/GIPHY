@@ -17,10 +17,13 @@ import com.example.forgiphyapp.R
 import com.example.forgiphyapp.adapters.GifListAdapter
 import com.example.forgiphyapp.databinding.FragmentGifListBinding
 import com.example.forgiphyapp.viewModels.BaseViewModel
+import com.example.forgiphyapp.viewModels.GifAction
 import com.example.forgiphyapp.viewModels.GifListViewModel
 import com.zhuinden.fragmentviewbindingdelegatekt.viewBinding
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
+import org.koin.android.ext.android.bind
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -36,7 +39,6 @@ abstract class BaseFragment<VM : BaseViewModel>(id: Int) : Fragment(id) {
         lazy(LazyThreadSafetyMode.NONE) {
             bindingInflater.invoke(layoutInflater)
         }
-
 
     private val baseViewModel: VM by viewModel(clazz = viewModelClass(), parameters = {
         parametersOf(getParameters())
@@ -69,7 +71,7 @@ class GifListFragment :
     private val adapter: GifListAdapter by lazy {
         GifListAdapter(
             { viewModel.navigateToGifDetailFragment(it) },
-            { viewModel.likeGif(it) })
+            { viewModel.handleAction(GifAction.likeGif(it)) })
     }
 
 
@@ -82,7 +84,7 @@ class GifListFragment :
         binding.imageList.adapter = adapter
 
         binding.refreshLayout.setOnRefreshListener {
-            viewModel.refresh()
+            viewModel.handleAction(GifAction.refresh)
             binding.refreshLayout.isRefreshing = false
         }
 
@@ -91,21 +93,21 @@ class GifListFragment :
             override fun afterTextChanged(s: Editable?) {}
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (!s.isNullOrEmpty()) viewModel.searchNewData(s.toString())
+                if (!s.isNullOrEmpty()) viewModel.handleAction(GifAction.searchGif(search = s.toString()))
             }
         })
 
-        binding.buttonError.setOnClickListener { viewModel.refresh() }
+        binding.buttonError.setOnClickListener { viewModel.handleAction(GifAction.refresh) }
 
         binding.linearButton.setOnClickListener { viewModel.linearOrGrid(true) }
 
         binding.gridButton.setOnClickListener { viewModel.linearOrGrid(false) }
 
-        binding.nextPageButton.setOnClickListener { viewModel.nextPage() }
+        binding.nextPageButton.setOnClickListener { viewModel.handleAction(GifAction.searchGif(nextPage = true)) }
 
-        binding.previousPageButton.setOnClickListener { viewModel.previousPage() }
+        binding.previousPageButton.setOnClickListener {  viewModel.handleAction(GifAction.searchGif(nextPage = false))}
 
-        binding.likeButton.setOnClickListener { viewModel.getLikeGif() }
+        binding.likeButton.setOnClickListener {  viewModel.handleAction(GifAction.getLikeGif()) }
 
         observeViewModel()
     }
@@ -158,6 +160,7 @@ class GifListFragment :
                     }
 
                 }
+                cancel()
             } catch (e: Exception) {
                 e.message?.let { Log.i("GifListFragment", it) }
             }
